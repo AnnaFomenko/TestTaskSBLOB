@@ -1,0 +1,33 @@
+{
+  "mysql": {
+    "host": "localhost",
+    "port":3306,
+    "user": "user",
+    "password": "pass",
+    "db": "blobtest",
+    "multipleStatements": true
+  },
+  "facebook": {
+    "table_name_profile": "fbusers",
+    "table_name_post": "fbpost",
+    "client_id": "1963346297236330",
+    "client_secret": "dcd4d65b7beaa4989ac96d887f105a5a"
+  },
+  "twitter": {
+    "table_name_profile": "twitterusers",
+    "table_name_post": "twitterpost",
+    "consumer_key": "iuk02N5utJ4WS11oO30BrZOOl",
+    "consumer_secret":"NlacuvI2HQ5j8YOkTDPME0lHveU8AjFxQOX5B5TjWhqemMbObW"
+  },
+  "spotify": {
+    "table_name_profile": "spotifyusers",
+    "table_name_post": "spotifypost",
+    "api_url":"https://api.spotify.com/v1/artists/"
+  },
+  "youtube": {
+    "table_name_profile": "youtubeusers",
+    "table_name_post": "youtubepost",
+    "api_url":"https://www.googleapis.com/youtube/v3/channels"
+  }
+
+}

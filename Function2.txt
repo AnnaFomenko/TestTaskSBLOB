@@ -1,0 +1,71 @@
+Please create a middleware to export functions of the same platform together. Future functions for the same platform will be added to the platforms middleware.
+
+------------------------------------------------------------------------------------------------------------------
+Function 2 -- Update posts -- Required for facebook, twitter, youtube & spotify
+------------------------------------------------------------------------------------------------------------------
+
+This functions purpose is to save the posts of a specific user to the database. Every post makes up it's own row in the table. None is saved twice. Every time an already saved post is answered, it's row get's updated instead.
+
+Parameters are "identifier", unlike the first fucntion this will always be an id, authinfo/token, also the same and "all", a boolean. (true/false).
+Typically social media apis answer with a certain amount of posts, then require you to make another request to get more posts. Youtube for example lets you request 50 posts at a time, and gives you a "next" parameter for requesting the next page of 50more posts.
+If all is true, this function will go through all pages until there is no newer post left, making sure to save all posts get added or updated.
+If all is false, this function will go through posts & pages until it finds a post that was already saved. (This effectively allows us to request only the new, unsaved posts)
+After it is done with either of those things, it just does next();
+To find the way to call each next page, please just look at the object the calls return, they all include something like a "next", "more" value or something of that sort. 
+In order to see when there is no more posts.. please just test it on a profile. Some apis don't add a next object in the response, some will, but then the request will return an empty array of posts.
+Also keep in mind this may be called to profiles with no, just one or less than one page of posts as well.
+ 
+
+
+ Youtube:
+Lets you request 50 at a time.
+ 
+Url is https://www.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails' + tokenQ + '&maxResults=50&playlistId=' + user + '&key=' + token
+ 
+ Getting the playlistId requires the id of the user. The playlistId is always the userId.replace('UC', 'UU');
+ Oddly they don't state that anywhere and the documentation says to make an extra call to find this playlistId... but this works every time. Essentially because the youtube database just treats your uploads as a playlist with the topic being your channel.
+ 
+ Facebook
+ 
+ Facebooks limit is 100.
+ 
+ https://graph.facebook.com/me/posts/?fields=reactions.limit(0).summary(true),comments.limit(0).summary(true),application,full_picture,caption,description,icon,is_hidden,is_published,message_tags,name,object_id,parent_id,permalink_url,picture,privacy,properties,source,status_type,story,story_tags,updated_time,type,shares,link,message,created_time,likes.limit(0).summary(true)&limit=100&access_token=' + access_token
+ 
+ 
+ Twitter
+ 
+ Twitter responds with up to 200 per page (this is a number that varies by request.. I know, bugged me too)
+ Just like in function 1, you will need an options parameter here. Please set "count": 200 and "include_rts": true.
+ 
+The path is "statuses/user_timeline" and can only return the latest 2 or 3000 posts I think. That is otally sufficient though.
+
+Same as in function 1, twitter is the example you can roughly orient on for the other platforms in terms of table structure.
+Keep in mind, id_str is the important one!
+
++-------------+---------------------+------+-----+-------------------+-----------------------------+
+| Field       | Type                | Null | Key | Default           | Extra                       |
++-------------+---------------------+------+-----+-------------------+-----------------------------+
+| id_str      | varchar(155)        | NO   | PRI | NULL              |                             |
+| user_id     | bigint(20) unsigned | YES  |     | NULL              |                             |
+| textcontent | text                | YES  |     | NULL              |                             |
+| detail_json | longblob            | YES  |     | NULL              |                             |
+| updated     | timestamp           | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP |
+| id          | bigint(20) unsigned | YES  |     | NULL              |                             |
++-------------+---------------------+------+-----+-------------------+-----------------------------+
+
+
+Spotify
+
+Same as the others, the link is the following.
+'https://api.spotify.com/v1/artists/' + id + '/albums?limit=50&access_token=' + aKey
+
+
+//comments
+A general thing you can tell your developer by the way.
+
+App authentication (just using your standard app id and secret or token) is generally the same as using user auth
+So you can run it with your app info and it will work with user info as long as you dont use things like /me where it gets the owner of the token
+I think that caused her to waste a lot of her precious time last time
+Since those are 4 platforms now, i think its good not to do that again
+
+

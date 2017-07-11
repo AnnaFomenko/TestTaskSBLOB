@@ -1,0 +1,78 @@
+Please create a middleware to export functions of the same platform together. Future functions for the same platform will be added to the platforms middleware.
+
+------------------------------------------------------------------------------------------------------------------
+Function 1 -- Update profile info -- Required for facebook, twitter, youtube & spotify
+------------------------------------------------------------------------------------------------------------------
+
+Flow
+Request profile from api -> save current data of profile in mysql db/delete entry if profile doesnt exist anymore -> next(idOfSavedProfile);
+
+This includes only the profile data. Not posts or friends. No authentication needed. Tokens are provided by different functions.
+The two parameters that are parsed are always authInfo(token or id & key) & identifier(id, name, link etc).
+
+
+Facebook
+
+For facebook the /<identifier> request can return profiles or pages. Requesting a page with profile parameters or a profile with page parameters should give you an error. Use either one by default and determine if it needs to be called with the other parameters by looking at the error.
+
+Page
+?fields=id,about,cover,birthday,link,picture,website,name,is_verified,location,hometown,fan_count
+
+Profile
+?fields=id,about,cover,currency,devices,birthday,link,locale,picture,meeting_for,middle_name,accounts,session_keys,groups,likes,videos,website,family,work,name_format,political,public_key,photos,favorite_teams,favorite_athletes,last_name,email,first_name,name,gender,is_verified,location,interested_in,hometown,quotes,relationship_status,religion,security_settings,significant_other,sports,timezone,updated_time,verified,languages
+
+If you need to do0 quick testing with what responses look like, facebook has an online tool for that called the graph api explorer. It's very useful.
+For facebook please use fbgraph.
+
+
+
+Twitter
+
+Twitter is very straight forward.
+Please use the module 'twit',
+However, it requires a special parameter instead of identifier. This is very easy to do though, just replace the identifier parameter with the options parameter(object) like it is shown in their documentation.
+Essentially that object has either .user_id or screen_name and some optional stuff in it that you don't have to bother with. (The module handles them)
+Twitters table structure is the only one that is currently set in stone. Please orient the others on it's structure and name.
+Also, it is important to note that twitter uses id_str as the true id of a profile or posts w/e. Most of the time id and id_str are the same, but not always. When they are not, only id_str will be functional.
+So work with that one.
+
+Table
+
+twitterUsers
++--------------+---------------------+------+-----+-------------------+-------+
+| Field        | Type                | Null | Key | Default           | Extra |
++--------------+---------------------+------+-----+-------------------+-------+
+| id_str       | bigint(20) unsigned | NO   | PRI | 0                 |       |
+| name         | varchar(255)        | NO   |     |                   |       |
+| screen_name  | varchar(255)        | YES  |     | NULL              |       |
+| detail_json  | longblob            | YES  |     | NULL              |       |
+| updated      | timestamp           | NO   |     | CURRENT_TIMESTAMP |       |
+| lastGetPosts | datetime            | YES  |     | NULL              |       |
+| id_          | bigint(20) unsigned | YES  |     | NULL              |       |
++--------------+---------------------+------+-----+-------------------+-------+
+
+
+Youtube
+
+Youtube is so simple in it's nature that you don't even need a special module for it.
+However, you need to make two calls to get the info that we need!
+It differenciates between a snippet of a profile and the statistics. We need both.
+Also, channels can be called with an id or a custom url. Make the identifier an object and have it determine if id or custom url are set.
+I would use the module 'request' to make normal calls to it's api.
+For testing you can just make calls with your browser url once you have setup a dev account for youtube and gotten your app token. (App token and custom tokens are pretty much handled the same, no need for you to go throught he hassle of making an auth to test)
+
+type can either be 'id' or 'forUsername' and identifier is then either an id, or username
+https://www.googleapis.com/youtube/v3/channels?part=statistics&' + type + '=' + identifier + '&key=' + token
+
+the other one just replaces part=statistics with part=snippet
+
+Just save both of their responses in a blob
+
+
+Spotify
+
+
+Same as youtube, but even simpler because only one call and the identifier is only a string. 
+
+https://api.spotify.com/v1/artists/' + id + '?access_token=' + aKey
+

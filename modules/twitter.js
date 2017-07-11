@@ -22,7 +22,6 @@ exports.updateProfile = function (id, token, next) {
 };
 
 function profile (id, next) {
-    var laststatus = null;
     twitter.get('users/show', { user_id: id }, function(err, details) {
         if (err || !details) {
             deleteData(id, next);
@@ -37,15 +36,19 @@ function addOrUpdateData ( id, details, next) {
     var name = details.name;
     var screen_name = details.screen_name;
     var lastGetPosts = (details.status) ? details.status.created_at : null;
+    if(lastGetPosts){
+        lastGetPosts = new Date(lastGetPosts);
+    }
     connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE}  WHERE id_str = ?`, id.toString(), function(err, result){
         if(err){
             return next();
         }
         details = JSON.stringify(details);
         if(result && result.length > 0){
-            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, updated = NOW() where id_str = ?;`,[details, id.toString()]
-                , function(err, result){
+            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, lastGetPosts = ?, updated = NOW() where id_str = ?;`,[details, lastGetPosts, id.toString()]
+                , function(err){
                       if(err){
+                          console.log(err);
                           return next();
                       }
                      next(id)

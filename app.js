@@ -61,7 +61,7 @@ db.init(function(err, connection){
         youtube.init(connection);
 
         //test
-        facebook.updateProfile(901526266540071,'EAACEdEose0cBAPBqal0U1XRXAfke34IWc81zFbPZC2UYVyDLlwg6wdXwC485ZBL8dZAC7tbqruOfe5NzLC0rJYIl7wuTdQgSri8dflbxIyelcl74TWvg2J3M7TCJpOSBiJahCXvQjMaljI2cNA8gIEtOaxYiwNcgMgNsvFYsRSwZAjkyM2n1Wdq57MpORm4ZD',  function(id){
+        facebook.updateProfile(901526266540071,'EAACEdEose0cBALCDQ8N1FdVf9NPxvl2DPp5LZARZBGZACUFDd43zzwvo0DM1GPD5j1AZAOnjkn0INoy9mrWMuW9qyJOHNzWZAZCaJn233ZAeIOQWQNd9J0jGKXmD7vfjynJHF1cKyDJKb0wbkqVfj4sC4y1zB426fITLV1OZAzDsLk8jxnvSed7B9g9xsLth7iIZD',  function(id){
             console.log('facebook idOfSavedProfile='+id);
         });
         twitter.updateProfile('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(id){

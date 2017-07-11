@@ -1,21 +1,11 @@
 const request = require("request");
 const config = require("../config");
+const db = require("./database");
 const TABLE_NAME_PROFILE = config.get('spotify:table_name_profile');
 const TABLE_NAME_POST = config.get('spotify:table_name_post');
 const API_URL = config.get('spotify:api_url');
-var connection;
-var initialized = false;
-
-
-exports.init = function (dbconn) {
-    connection = dbconn;
-    initialized = true;
-};
 
 exports.updateProfile = function ( id, token, next ) {
-    if(!initialized){
-        return next();
-    }
     profile(id, token, next);
 };
 
@@ -33,6 +23,7 @@ function profile (id, token, next) {
 function addOrUpdateData (id, details, next) {
     details = JSON.parse(details);
     var name = details.name;
+    var connection = db.getConnection();
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE}  WHERE id = ?`, id, function(err, result){
         if(err){
             next(err)
@@ -61,6 +52,7 @@ function addOrUpdateData (id, details, next) {
 
 //delete user profile or page
 function deleteData (id, next) {
+    var connection = db.getConnection();
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE} WHERE id = ?`, id, function(err, result){
         if(err){
             return next(err);

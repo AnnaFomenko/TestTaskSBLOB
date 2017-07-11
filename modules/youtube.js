@@ -1,23 +1,12 @@
+const config = require("../config");
+const db = require("./database");
 const request = require("request");
 const async = require("async");
-const config = require("../config");
-const notinited = new Error('Module is not initialized');
 const TABLE_NAME_PROFILE = config.get('youtube:table_name_profile');
 const TABLE_NAME_POST = config.get('youtube:table_name_post');
 const API_URL = config.get('youtube:api_url');
-var connection;
-var initialized = false;
-
-
-exports.init = function (dbconn) {
-    connection = dbconn;
-    initialized = true;
-};
 
 exports.updateProfile = function ( id, token, next) {
-    if(!initialized){
-        return next();
-    }
     profile(id, token, next);
 };
 
@@ -32,7 +21,6 @@ function getSnippet(id, token, cb){
         cb(err, body);
     });
 }
-
 
 function profile (id, token, callback) {
     var items = [];
@@ -57,6 +45,7 @@ function profile (id, token, callback) {
 
 //add or update existing user profile
 function addOrUpdateData ( id, details, next) {
+    var connection = db.getConnection();
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE}  WHERE id = ?`, id, function(err, result){
         if(err){
             return next()
@@ -82,6 +71,7 @@ function addOrUpdateData ( id, details, next) {
 
 //delete user profile or page
 function deleteData (id, next) {
+    var connection = db.getConnection();
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE} WHERE id = ?`, id, function(err, result){
         if(err){
             return next();

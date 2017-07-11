@@ -11,17 +11,17 @@ exports.init = function (callback) {
     const createYoutubeUsersTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_profile')} (id BIGINT UNSIGNED, PRIMARY KEY(id), detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP );`;
     const createSpotifyUsersTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_profile')} (id VARCHAR(155), PRIMARY KEY(id), name VARCHAR(255) NOT NULL, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP );`;
 
-    //const createFBPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('facebook:table_name_post')} (id BIGINT UNSIGNED, PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
-    //const createTwitPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('twitter:table_name_post')} (id_str VARCHAR(155), PRIMARY KEY(id_str), id BIGINT UNSIGNED, user_id BIGINT UNSIGNED, textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
-    //const createYoutubePostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_post')} (id BIGINT UNSIGNED, PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
-    //const createSpotifyPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createFBPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('facebook:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createTwitPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('twitter:table_name_post')} (id_str VARCHAR(155), PRIMARY KEY(id_str), id BIGINT UNSIGNED, user_id BIGINT UNSIGNED, textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createYoutubePostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_post')} (id BIGINT UNSIGNED, PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createSpotifyPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
 
-    const tables = [createFBUsersTableQuery, createTwitUsersTableQuery, createYoutubeUsersTableQuery, createSpotifyUsersTableQuery];//, createFBPostsTableQuery, createTwitPostsTableQuery, createYoutubePostsTableQuery, createSpotifyPostsTableQuery];
+    const tables = [createFBUsersTableQuery, createTwitUsersTableQuery, createYoutubeUsersTableQuery, createSpotifyUsersTableQuery, createFBPostsTableQuery, createTwitPostsTableQuery, createYoutubePostsTableQuery, createSpotifyPostsTableQuery];
     //mysql connection
     dataBaseConnect(function () {
         connection.query(createDataBaseQuery, function (err, result) {
             if (err) {
-                console.log(err.message)
+                console.error(err.message)
             } else {
                 connection.query(useDataBaseQuery, function (err, result) {
                     if(err){
@@ -41,6 +41,13 @@ exports.init = function (callback) {
             }
         });
     });
+};
+
+exports.getConnection = function () {
+    if(connection){
+        return connection;
+    }
+    dataBaseConnect();
 };
 
 //connect to database

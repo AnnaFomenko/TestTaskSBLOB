@@ -1,22 +1,14 @@
 const config = require("../config");
+const db = require("./database");
+const errors = require("./errors");
 const twit = require("twit");
 const TABLE_NAME_PROFILE = config.get('twitter:table_name_profile');
 const TABLE_NAME_POST = config.get('twitter:table_name_post');
-var connection;
-var twitter;
-var initialized = false;
-
-
-exports.init = function (dbconn, config) {
-    connection = dbconn;
-    twitter = new twit(config);
-    initialized = true;
-};
+const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
+                          , consumer_secret: config.get('twitter:consumer_secret')
+                          , app_only_auth: true});
 
 exports.updateProfile = function (id, token, next) {
-    if(!initialized){
-        return next();
-    }
     twitter.setAuth(token);
     profile(id, next);
 };
@@ -39,6 +31,7 @@ function addOrUpdateData ( id, details, next) {
     if(lastGetPosts){
         lastGetPosts = new Date(lastGetPosts);
     }
+    var connection = db.getConnection();
     connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE}  WHERE id_str = ?`, id.toString(), function(err, result){
         if(err){
             return next();
@@ -67,6 +60,7 @@ function addOrUpdateData ( id, details, next) {
 
 //delete user profile
 function deleteData (id, next) {
+    var connection = db.getConnection();
     connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE} WHERE id_str = ?`, id, function(err, result){
         if(err){
             return next();

@@ -1,4 +1,4 @@
-1. in facebook you use graph.setAccessToken(token);
+1. in facebook you use graph.setAccessToken(token); - done
 This is an issue. Because there might be 50 calls happening at the same time and you are setting a global value.
 Ergo, one call might use another calls token because it was called in the middle. Instead you can do it like this:
 
@@ -6,7 +6,7 @@ graph.get('me?fields=id,about,cover,currency,devices,birthday,link,locale,pictur
 
 This makes sure the call actually uses the token.
 
-2. somehow this call causes the page to be saved with an id of 0
+2. somehow this call causes the page to be saved with an id of 0 - fixed
 https://gyazo.com/76526889c0831c06023dadeac9dd919e
 
 3. i asked you that for twitter, ill be able to directly put in the options object as a parameter, so that i could set either a screen_name or user_id to query

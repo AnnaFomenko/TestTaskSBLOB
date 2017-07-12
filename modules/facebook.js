@@ -10,8 +10,7 @@ const TABLE_NAME_POST = config.get('facebook:table_name_post');
 const POSTS_LIMIT = 50;
 
 exports.updateProfile = function ( user_id, token, next) {
-    graph.setAccessToken(token);
-    profile(user_id, next);
+    profile(user_id, token, next);
 };
 
 exports.updatePosts = function ( user_id, token, all, next) {
@@ -20,12 +19,12 @@ exports.updatePosts = function ( user_id, token, all, next) {
 };
 
 //profile
-function profile (id, next) {
+function profile (id, token, next) {
     graph.get(id+'?fields=id,about,cover,currency,devices,birthday,link,locale,picture,meeting_for,middle_name,accounts,session_keys,groups,likes,videos,website,family,work,name_format,political,public_key,photos,favorite_teams,favorite_athletes,last_name,email,first_name,name,gender,is_verified,location,interested_in,hometown,quotes,relationship_status,religion,security_settings,significant_other,sports,timezone,updated_time,verified,languages'
-       , function(err, result) {
+    , { access_token: token}, function(err, result) {
             if (err) {
                 if(err.code === 100){
-                    return page(id, next);
+                    return page(id, token, next);
                 }
                 return next(err.message);
             }
@@ -36,9 +35,9 @@ function profile (id, next) {
     });
 };
 
-function page (id, next) {
+function page (id, token, next) {
     graph.get(id+'?fields=id,about,cover,birthday,link,picture,website,name,is_verified,location,hometown,fan_count'
-        , function(err, result) {
+        , { access_token: token}, function(err, result) {
         if (err) {
             if(err.code === 100){
                 return deleteData (id, next);
@@ -188,8 +187,7 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
         id = posts[i].id;
         details = JSON.stringify(posts[i]);
         details = details.replace(/'/g, '`');
-        textcontent = (posts[i].message) ? encodeURIComponent(posts[i].message.replace(/\(/iu,"")) : '_';
-        console.log('textcontent='+textcontent+"__")
+        textcontent = (posts[i].message) ? encodeURIComponent(posts[i].message.replace(/[':()/!|\/]/iug, "")) : '_';
         if(existingPostIds.indexOf(posts[i].id) != -1){
             updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = ${user_id}, updated = NOW() where id = '${id}';`;
         } else {

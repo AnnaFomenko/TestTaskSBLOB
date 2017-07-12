@@ -44,7 +44,6 @@ function getSnippet(id, token, callback){
         let body = null;
         if( result.body ){
             try{
-                console.log(result.body)
                 body = JSON.parse(result.body);
                 err = body.error;
                 if(!err && body.pageInfo.totalResults === 0){

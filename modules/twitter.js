@@ -10,83 +10,102 @@ const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
                           , app_only_auth: true});
 const POSTS_LIMIT = 50;
 
-exports.updateProfile = function (user_id, token, next) {
+exports.updateProfile = function (options, token, next) {
     twitter.setAuth(token);
-    profile(user_id, next);
+    profile(options, next);
 };
 
-exports.updatePosts = function (user_id, token, all, next) {
+exports.updatePosts = function (options, token, all, next) {
     let max_id = 0;
     twitter.setAuth(token);
-    posts(user_id, all, max_id, next);
+    posts(options, all, max_id, next);
 };
 
 //profile
-function profile (id, next) {
-    twitter.get('users/show', { user_id: id }, function(err, details) {
-        if (err || !details) {
-            deleteData(id, next);
-        } else {
-            addOrUpdateData(id, details, next);
+function profile (options, next) {
+    twitter.get('users/show', options, function(err, result) {
+        if(err){
+            if(err.code === 50){
+                return deleteData (options, next);
+            }
+            return next(err.message);
         }
+
+
+        if(!result){
+            return next(errors.emptyResult);
+        }
+        addOrUpdateData(options, result, next);
+
     });
 };
 
 //add or update existing user profile
-function addOrUpdateData ( id, details, next) {
+function addOrUpdateData ( options, details, next ) {
     const name = details.name;
+    const id_str = details.id_str;
+    const id = details.id;
     const screen_name = details.screen_name;
+
     let lastGetPosts = (details.status) ? details.status.created_at : null;
     if(lastGetPosts){
         lastGetPosts = new Date(lastGetPosts);
     }
     const connection = db.getConnection();
-    connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE}  WHERE id_str = ?`, id.toString(), function(err, result){
+    connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE}  WHERE id_str = ?`, id_str, function(err, result){
         if(err){
-            return next();
+            return next(err.message);
         }
         details = JSON.stringify(details);
         if(result && result.length > 0){
-            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, lastGetPosts = ?, updated = NOW() where id_str = ?;`,[details, lastGetPosts, id.toString()]
+            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, lastGetPosts = ?, updated = NOW() where id_str = ?;`,[details, lastGetPosts, id_str]
                 , function(err){
                       if(err){
-                          return next();
+                          return next(err.message);
                       }
-                     next(id)
+                     next(null, options);
                 });
         } else {
-            connection.query(`INSERT INTO ${TABLE_NAME_PROFILE} ( id_str, id, name, screen_name, detail_json, lastGetPosts ) VALUES (?, ?, ?, ?, ?, ?);`, [ id.toString(), id, name, screen_name, details, lastGetPosts]
-                , function(err, result){
+            connection.query(`INSERT INTO ${TABLE_NAME_PROFILE} ( id_str, id, name, screen_name, detail_json, lastGetPosts ) VALUES (?, ?, ?, ?, ?, ?);`, [ id_str, id, name, screen_name, details, lastGetPosts]
+                , function(err){
                 if(err){
-                    return next();
+                    return next(err.message);
                 }
-                next(id)
+                next(null, options);
             });
         }
     });
 }
 
 //delete user profile
-function deleteData (id, next) {
+function deleteData (options, next) {
+    let param = options.user_id ? options.user_id : options.screen_name;
+    let paramName = options.user_id ? 'id_str' : 'screen_name';
     const connection = db.getConnection();
-    connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE} WHERE id_str = ?`, id, function(err, result){
+    connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE} WHERE ${paramName} = ?`, param, function(err, result){
         if(err){
-            return next();
+            return next(err.message);
         }
         if(result && result.length > 0){
-            connection.query(`DELETE from ${TABLE_NAME_PROFILE} WHERE id_str = ?`,  id, function(){
-                next();
+            connection.query(`DELETE from ${TABLE_NAME_PROFILE} WHERE ${paramName} = ?`,  param, function (err) {
+                if(err) {
+                    return next(err.message);
+                }
+                next(errors.profileNotExist);
             });
+        } else {
+            next(errors.profileNotExist);
         }
     });
 }
 
 //posts
-function posts (user_id, all, max_id, next) {
-    console.log('post::'+max_id);
+function posts (options, all, max_id, next) {
+    console.log('updatePosts: '+max_id);
     let postIds = [];
     let existingPostIds = [];
-    getNextPosts(user_id, max_id, function(err, result){
+    let user_id;
+    getNextPosts(options, max_id, function(err, result){
         if (err) {
             return next(err.message);
         }
@@ -117,19 +136,19 @@ function posts (user_id, all, max_id, next) {
                     existingPostIds.push(results[i].id_str);
                 }
             }
-            addOrUpdatePosts( user_id, data, existingPostIds
+            addOrUpdatePosts( options, data, existingPostIds
                 , function(err, result){
                     if(err){
                         return next(err.message);
                     }
                     if( all || existingPostIds.length < data.length){
                         if(max_id > 0) {
-                            posts( user_id, all, max_id, next )
+                            posts( options, all, max_id, next )
                         } else {
-                            next(null, user_id);
+                            next(null, options);
                         }
                     } else {
-                        next(null, user_id);
+                        next(null, options);
                     }
                 });
         });
@@ -137,8 +156,10 @@ function posts (user_id, all, max_id, next) {
     });
 };
 
-function getNextPosts(user_id, max_id, callback){
-    let params = { user_id: user_id, include_rts:1, count:POSTS_LIMIT };
+function getNextPosts(options, max_id, callback){
+    let params = options;
+    params.include_rts = 1;
+    params.count = POSTS_LIMIT;
     if(max_id > 0){
         params.max_id = max_id;
     }
@@ -146,23 +167,25 @@ function getNextPosts(user_id, max_id, callback){
 }
 
 //add or update posts
-function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
+function addOrUpdatePosts (options, posts, existingPostIds, callback) {
     const connection = db.getConnection();
     let updateQuery = '';
     let insertQuery = '';
     let details;
     let textcontent = '';
     let id, id_str;
+    let user_id;
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
         id_str = posts[i].id_str;
+        user_id = posts[i].user.id_str;
         details = JSON.stringify(posts[i]);
         details = details.replace(/'/g, '`');
         textcontent = (posts[i].text) ? encodeURIComponent(posts[i].text.replace(/\(/iu,"")) : '_';
         if(existingPostIds.indexOf(id_str) != -1){
-            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = ${user_id}, updated = NOW() where id_str = '${id_str}';`;
+            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = '${user_id}', updated = NOW() where id_str = '${id_str}';`;
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id_str, id, detail_json, textcontent, user_id ) VALUES ('${id_str}', '${id}', '${details}', '${textcontent}', ${user_id});`;
+            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id_str, id, detail_json, textcontent, user_id ) VALUES ('${id_str}', '${id}', '${details}', '${textcontent}', '${user_id}');`;
         }
     }
     connection.query(updateQuery+insertQuery, callback);

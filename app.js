@@ -54,37 +54,42 @@ db.init(function(err, connection){
         console.error('INIT db: ' + err.message);
     } else {
         //test
-        //facebook.updateProfile(901526266540071,'EAACEdEose0cBAKdyJUgsZCIb677sl7TWbHl5JrIEZBk15l82r6ArHh5DYz3LZCZAC39YidvePW1oD1Av4wx4lyb3epUiAeYQzZBgaRk7fyeQcZAIZARj2AYPyZBYueFb6aJkAEBXZCKa8WNzhio4Dss78jD0Swm2q7c6uPq5BG7LimrGSU9g1TVBJZAnocfELa658ZD',  function(err, id){
-            //console.log('facebook err='+err);
-            //console.log('facebook idOfSavedProfile='+id);
-        //});
-        //facebook.updatePosts(901526266540071, 'EAACEdEose0cBAMLYb2D6TQkAsLjhAFlXrvm2rU1YnsAVuLdeoR6ZBAxHzZCGJZB9K1eJYn2PhpkWHftukX500sSxahGF45RBhAuEeh185JhZAkVSQTbw2LAzScAS6qMcuW3cAB9cmiBEwAGRBjdxsi1W38EcZBT78ZA7Qo1YVcPgw49wtWwv6PiNAaZA6TsgfUZD', true, function(err, id){
-            //console.log('facebook err='+err);
-            //console.log('facebook idOfSavedProfile='+id);
-       // });
-       // twitter.updateProfile('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(err, id){
-            //console.log('twitter idOfSavedProfile='+id);
-       //});
-        //twitter.updatePosts('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', true, function(err, id){
-            //console.log('twitter err='+err);
-            //console.log('twitter idOfSavedProfile='+id);
-        //});
-        youtube.updateProfile('UC_x5XG1OV2P6uZZ5FSM9Ttw','AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, id){
-            console.log('youtube err='+err);
-            console.log('youtube idOfSavedProfile='+id);
+
+        facebook.updateProfile(901526266540071,'EAACEdEose0cBALCl9wb2lcA92YWG3ANOxL4H17R4TRW157gCvqEobYUuJVPd3gktino0qNL4UaP0UEicS7He796IweQ9bf0N8bPMebfTliztPpZBdDLjY66i69YSa4UbLC67ZCkZCs0DDHTlTVPmD8yZCQwk5AqiC5FKPZBiQAO4G5ZAwV9gfiZAejm9q9RFloZD',  function(err, id){
+            console.log('facebook updateProfile err='+err);
+            console.log('facebook updateProfile userId='+id);
         });
-        youtube.updatePosts('UC_x5XG1OV2P6uZZ5FSM9Ttw', 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', true, function(err, id){
-            console.log('youtube err='+err);
-            console.log('youtube idOfSavedProfile='+id);
+        facebook.updatePosts(901526266540071, 'EAACEdEose0cBALCl9wb2lcA92YWG3ANOxL4H17R4TRW157gCvqEobYUuJVPd3gktino0qNL4UaP0UEicS7He796IweQ9bf0N8bPMebfTliztPpZBdDLjY66i69YSa4UbLC67ZCkZCs0DDHTlTVPmD8yZCQwk5AqiC5FKPZBiQAO4G5ZAwV9gfiZAejm9q9RFloZD', false, function(err, id){
+            console.log('facebook updatePosts err='+err);
+            console.log('facebook updatePosts userId='+id);
         });
-        //spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', function(err, id){
-             //console.log('spotify err='+err);
-             //console.log('spotify idOfSavedProfile='+id);
-        //});
-        //spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', false, function(err, id){
-            //console.log('spotify err='+err);
-            //console.log('spotify idOfSavedProfile='+id);
-        //})
+
+        twitter.updateProfile({screen_name:'AnnaFomenko4'},'VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(err, options){
+            console.log('twitter updateProfile err='+err);
+            console.log('twitter updateProfile user='+JSON.stringify(options));
+        });
+        twitter.updatePosts({user_id:'884356029798023173'},'VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', false, function(err, options){
+            console.log('twitter updatePosts err='+err);
+            console.log('twitter updatePosts user='+JSON.stringify(options));
+        });
+
+        youtube.updateProfile('UC_x5XG1OV2P6uZZ5FSM9Ttw','AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, options){
+            console.log('youtube updateProfile err='+err);
+            console.log('youtube updateProfile user='+JSON.stringify(options));
+        });
+        youtube.updatePosts('UC_x5XG1OV2P6uZZ5FSM9Ttw', 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', false, function(err, options){
+            console.log('youtube updatePosts err='+err);
+            console.log('youtube updatePosts user='+JSON.stringify(options));
+        });
+
+        spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', function(err, id){
+            console.log('spotify updateProfile err ='+err);
+            console.log('spotify updateProfile userId ='+id);
+        });
+        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', false, function(err, id){
+            console.log('spotify updatePosts err ='+err);
+            console.log('spotify updatePosts userId='+id);
+        })
 
 
     }

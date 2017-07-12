@@ -9,14 +9,13 @@ const TABLE_NAME_PROFILE = config.get('facebook:table_name_profile');
 const TABLE_NAME_POST = config.get('facebook:table_name_post');
 const POSTS_LIMIT = 50;
 
-exports.updateProfile = function ( id, token, next) {
+exports.updateProfile = function ( user_id, token, next) {
     graph.setAccessToken(token);
-    profile(id, next);
+    profile(user_id, next);
 };
 
 exports.updatePosts = function ( user_id, token, all, next) {
     let nextUrl = `${config.get("facebook:api_url")}${user_id}/posts?fields=reactions.limit(0).summary(true),comments.limit(0).summary(true),application,full_picture,caption,description,icon,is_hidden,is_published,message_tags,name,object_id,parent_id,permalink_url,picture,privacy,properties,source,status_type,story,story_tags,updated_time,type,shares,link,message,created_time,likes.limit(0).summary(true)&limit=${POSTS_LIMIT}&access_token=${token}`;
-    console.log(nextUrl);
     posts(user_id, all, nextUrl, next);
 };
 
@@ -109,17 +108,16 @@ function posts (user_id, all, nextUrl, next) {
     let postIds = [];
     let existingPostIds = [];
     getNextPosts(nextUrl, function(err, result){
-
-        if(result.paging){
-            nextUrl = result.paging.next;
-        } else {
-            nextUrl = null;
-        }
         if (err) {
             return next(err.message);
         }
         if(!result || !result.data) {
             return next(errors.emptyResult);
+        }
+        if(result.paging){
+            nextUrl = result.paging.next;
+        } else {
+            nextUrl = null;
         }
         let data = result.data;
         if(data.length > 0){
@@ -162,6 +160,9 @@ function posts (user_id, all, nextUrl, next) {
 
 function getNextPosts(nextUrl, callback){
     request(nextUrl, function(err, result){
+        if(err){
+            return callback(err);
+        }
         let body = null;
         if( result.body ){
             try{

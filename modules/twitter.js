@@ -10,12 +10,12 @@ const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
                           , app_only_auth: true});
 const POSTS_LIMIT = 50;
 
-exports.updateProfile = function (id, token, next) {
+exports.updateProfile = function (user_id, token, next) {
     twitter.setAuth(token);
-    profile(id, next);
+    profile(user_id, next);
 };
 
-exports.updatePosts = function ( user_id, token, all, next) {
+exports.updatePosts = function (user_id, token, all, next) {
     let max_id = 0;
     twitter.setAuth(token);
     posts(user_id, all, max_id, next);
@@ -50,7 +50,6 @@ function addOrUpdateData ( id, details, next) {
             connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, lastGetPosts = ?, updated = NOW() where id_str = ?;`,[details, lastGetPosts, id.toString()]
                 , function(err){
                       if(err){
-                          console.log(err);
                           return next();
                       }
                      next(id)
@@ -97,9 +96,10 @@ function posts (user_id, all, max_id, next) {
         let data = result;
         if(data.length > 0){
             let currentMaxId = data[data.length-1].id_str;
-            let locId = parseInt(currentMaxId.substr(currentMaxId.length-2, 2))-1;
-            currentMaxId = currentMaxId.substr(0,currentMaxId.length-2)+locId.toString();
             max_id = (max_id === currentMaxId) ? 0 : currentMaxId;
+            if(max_id == 0){
+                return next(null, user_id);
+            }
             for(let i = data.length-1; i >= 0 ; i--){
                 if(postIds.indexOf(data[i].id_str) != -1){
                     data.splice(i, 1);

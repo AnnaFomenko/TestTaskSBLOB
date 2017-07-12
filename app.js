@@ -65,16 +65,27 @@ db.init(function(err, connection){
        // twitter.updateProfile('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(err, id){
             //console.log('twitter idOfSavedProfile='+id);
        //});
-        twitter.updatePosts('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', true, function(err, id){
-            console.log('twitter err='+err);
-            console.log('twitter idOfSavedProfile='+id);
-        });
-        //youtube.updateProfile(950780794386,'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, id){
-            //console.log('youtube idOfSavedProfile='+id);
+        //twitter.updatePosts('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', true, function(err, id){
+            //console.log('twitter err='+err);
+            //console.log('twitter idOfSavedProfile='+id);
         //});
-        //spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQASjMvz2tsDOeTBGF3o-FYO16V9NNLNkSUVR5ZXMEXV6fByNnuqXyQo_NohnJpXPmXhJYR0mpQowczs6e4U_tPkSpTIMObgkbwNNMCZqLXEcr9-rbdp329EwR0IZ54x25Hwpr1Rdc6LT9dfuCJtO8Fsozo_Tvo', function(err, id){
+        youtube.updateProfile('UC_x5XG1OV2P6uZZ5FSM9Ttw','AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, id){
+            console.log('youtube err='+err);
+            console.log('youtube idOfSavedProfile='+id);
+        });
+        youtube.updatePosts('UC_x5XG1OV2P6uZZ5FSM9Ttw', 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', true, function(err, id){
+            console.log('youtube err='+err);
+            console.log('youtube idOfSavedProfile='+id);
+        });
+        //spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', function(err, id){
+             //console.log('spotify err='+err);
+             //console.log('spotify idOfSavedProfile='+id);
+        //});
+        //spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', false, function(err, id){
+            //console.log('spotify err='+err);
             //console.log('spotify idOfSavedProfile='+id);
         //})
+
 
     }
 });

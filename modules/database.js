@@ -8,26 +8,26 @@ exports.init = function (callback) {
 
     const createFBUsersTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('facebook:table_name_profile')} (id BIGINT UNSIGNED, PRIMARY KEY(id), type VARCHAR(8) NOT NULL, name VARCHAR(255) NOT NULL,  detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP );`;
     const createTwitUsersTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('twitter:table_name_profile')} (id_str VARCHAR(155), PRIMARY KEY(id_str),id BIGINT UNSIGNED, name VARCHAR(255) NOT NULL, screen_name VARCHAR(255) NOT NULL, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, lastGetPosts DATETIME);`;
-    const createYoutubeUsersTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_profile')} (id BIGINT UNSIGNED, PRIMARY KEY(id), detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP );`;
+    const createYoutubeUsersTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_profile')} (id VARCHAR(155), PRIMARY KEY(id), detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP );`;
     const createSpotifyUsersTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_profile')} (id VARCHAR(155), PRIMARY KEY(id), name VARCHAR(255) NOT NULL, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP );`;
 
     const createFBPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('facebook:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
     const createTwitPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('twitter:table_name_post')} (id_str VARCHAR(155), PRIMARY KEY(id_str), id BIGINT UNSIGNED, user_id BIGINT UNSIGNED, textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
-    const createYoutubePostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_post')} (id BIGINT UNSIGNED, PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
-    const createSpotifyPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id BIGINT UNSIGNED,  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createYoutubePostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id VARCHAR(155),  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createSpotifyPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id VARCHAR(155),  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
 
     const tables = [createFBUsersTableQuery, createTwitUsersTableQuery, createYoutubeUsersTableQuery, createSpotifyUsersTableQuery, createFBPostsTableQuery, createTwitPostsTableQuery, createYoutubePostsTableQuery, createSpotifyPostsTableQuery];
     //mysql connection
     dataBaseConnect(function () {
-        connection.query(createDataBaseQuery, function (err, result) {
+        connection.query(createDataBaseQuery, function (err) {
             if (err) {
                 console.error(err.message)
             } else {
-                connection.query(useDataBaseQuery, function (err, result) {
+                connection.query(useDataBaseQuery, function (err) {
                     if(err){
                         return callback(err);
                     }
-                    connection.query(tables.join(""), function (err, results) {
+                    connection.query(tables.join(""), function (err) {
                         if (err) {
                             console.error(err.message)
                         } else {

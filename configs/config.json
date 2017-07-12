@@ -2,8 +2,8 @@
   "mysql": {
     "host": "localhost",
     "port":3306,
-    "user": "user",
-    "password": "pass",
+    "user": "root",
+    "password": "",
     "db": "blobtest",
     "multipleStatements": true
   },
@@ -18,7 +18,8 @@
     "table_name_profile": "twitterusers",
     "table_name_post": "twitterpost",
     "consumer_key": "iuk02N5utJ4WS11oO30BrZOOl",
-    "consumer_secret":"NlacuvI2HQ5j8YOkTDPME0lHveU8AjFxQOX5B5TjWhqemMbObW"
+    "consumer_secret":"NlacuvI2HQ5j8YOkTDPME0lHveU8AjFxQOX5B5TjWhqemMbObW",
+    "api_url":"https://api.twitter.com/1.1/"
   },
   "spotify": {
     "table_name_profile": "spotifyusers",

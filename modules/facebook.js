@@ -7,7 +7,7 @@ const PROFILE = 'profile';
 const PAGE = 'page';
 const TABLE_NAME_PROFILE = config.get('facebook:table_name_profile');
 const TABLE_NAME_POST = config.get('facebook:table_name_post');
-const POSTS_LIMIT = 10;
+const POSTS_LIMIT = 50;
 
 exports.updateProfile = function ( id, token, next) {
     graph.setAccessToken(token);
@@ -16,7 +16,7 @@ exports.updateProfile = function ( id, token, next) {
 
 exports.updatePosts = function ( user_id, token, all, next) {
     let nextUrl = `${config.get("facebook:api_url")}${user_id}/posts?fields=reactions.limit(0).summary(true),comments.limit(0).summary(true),application,full_picture,caption,description,icon,is_hidden,is_published,message_tags,name,object_id,parent_id,permalink_url,picture,privacy,properties,source,status_type,story,story_tags,updated_time,type,shares,link,message,created_time,likes.limit(0).summary(true)&limit=${POSTS_LIMIT}&access_token=${token}`;
-    console.log(nextUrl)
+    console.log(nextUrl);
     posts(user_id, all, nextUrl, next);
 };
 
@@ -105,11 +105,11 @@ function deleteData (id, next) {
 
 //posts
 function posts (user_id, all, nextUrl, next) {
-    console.log('post')
+    console.log('post'+nextUrl);
     let postIds = [];
     let existingPostIds = [];
-    getNextPosts(nextUrl, all, function(err, result){
-        let data = result.data;
+    getNextPosts(nextUrl, function(err, result){
+
         if(result.paging){
             nextUrl = result.paging.next;
         } else {
@@ -121,8 +121,18 @@ function posts (user_id, all, nextUrl, next) {
         if(!result || !result.data) {
             return next(errors.emptyResult);
         }
-        for(let i = 0; i < result.data.length; i++){
-            postIds.push(result.data[i].id)
+        let data = result.data;
+        if(data.length > 0){
+            for(let i = data.length-1; i >=0 ; i--){
+                if(postIds.indexOf(data[i].id)!=-1){
+                    data.splice(i, 1);
+                    continue;
+                }
+                postIds.push(data[i].id)
+            }
+        }
+        if(postIds.length == 0){
+            return next(null, user_id);
         }
         checkExistingPosts(postIds, function(err, results){
             if(results && results.length>0){
@@ -131,11 +141,11 @@ function posts (user_id, all, nextUrl, next) {
                }
             }
             addOrUpdatePosts( user_id, data, existingPostIds
-                , function(err, result){
+                , function(err){
                     if(err){
                         return next(err.message);
                     }
-                    if( all || existingPostIds.length == 0){
+                    if( all || existingPostIds.length < data.length){
                         if(nextUrl) {
                             posts( user_id, all, nextUrl, next )
                         } else {
@@ -150,7 +160,7 @@ function posts (user_id, all, nextUrl, next) {
     });
 };
 
-function getNextPosts(nextUrl, all, callback){
+function getNextPosts(nextUrl, callback){
     request(nextUrl, function(err, result){
         let body = null;
         if( result.body ){
@@ -171,19 +181,17 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
     let updateQuery = '';
     let insertQuery = '';
     let details;
-    let textcontent;
+    let textcontent='';
     let id;
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
         details = JSON.stringify(posts[i]);
         details = details.replace(/'/g, '`');
-        textcontent = (posts[i].message) ? posts[i].message.replace(/'/g, '`') : '';
-
+        textcontent = (posts[i].message) ? encodeURIComponent(posts[i].message.replace(/\(/iu,"")) : '_';
+        console.log('textcontent='+textcontent+"__")
         if(existingPostIds.indexOf(posts[i].id) != -1){
             updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = ${user_id}, updated = NOW() where id = '${id}';`;
         } else {
-            console.log(existingPostIds)
-            console.log(posts[i].id)
             insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', '${details}', '${textcontent}', ${user_id});`;
         }
     }

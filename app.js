@@ -58,13 +58,17 @@ db.init(function(err, connection){
             //console.log('facebook err='+err);
             //console.log('facebook idOfSavedProfile='+id);
         //});
-        facebook.updatePosts(901526266540071, 'EAACEdEose0cBAEK80gZASrOiowIAlvnTpqHy8q03pQLpgzbqqsnIrdYlWu9ryuw5A3iitCxfUUQcTdC8yKF5xRoD4djomxq62DnKRhGDwxQSYcz29ZCaT4gm0hXe0ghynE6OHLklJbCKvD4dszSMkZBYTBfFZBxTdDi01Ec4R0MsY4fvx2SZAOleauzEhrIgZD', true, function(err, id){
-            console.log('facebook err='+err);
-            console.log('facebook idOfSavedProfile='+id);
-        });
+        //facebook.updatePosts(901526266540071, 'EAACEdEose0cBAMLYb2D6TQkAsLjhAFlXrvm2rU1YnsAVuLdeoR6ZBAxHzZCGJZB9K1eJYn2PhpkWHftukX500sSxahGF45RBhAuEeh185JhZAkVSQTbw2LAzScAS6qMcuW3cAB9cmiBEwAGRBjdxsi1W38EcZBT78ZA7Qo1YVcPgw49wtWwv6PiNAaZA6TsgfUZD', true, function(err, id){
+            //console.log('facebook err='+err);
+            //console.log('facebook idOfSavedProfile='+id);
+       // });
        // twitter.updateProfile('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(err, id){
             //console.log('twitter idOfSavedProfile='+id);
        //});
+        twitter.updatePosts('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', true, function(err, id){
+            console.log('twitter err='+err);
+            console.log('twitter idOfSavedProfile='+id);
+        });
         //youtube.updateProfile(950780794386,'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, id){
             //console.log('youtube idOfSavedProfile='+id);
         //});

@@ -55,6 +55,7 @@ function page (id, token, next) {
 function addOrUpdateData (id, details, next, type) {
     const connection = db.getConnection();
     const name = details.name;
+    id = details.id;
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE}  WHERE id = ?`, id, function(err, result){
         if(err){
             return next(err.message)

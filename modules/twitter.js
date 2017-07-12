@@ -15,10 +15,9 @@ exports.updateProfile = function (options, token, next) {
     profile(options, next);
 };
 
-exports.updatePosts = function (options, token, all, next) {
+exports.updatePosts = function (user_id, token, all, next) {
     let max_id = 0;
-    options.access_token = token;
-    posts(options, all, max_id, next);
+    posts(user_id, token, all, max_id, next);
 };
 
 //profile
@@ -34,7 +33,6 @@ function profile (options, next) {
             return next(errors.emptyResult);
         }
         addOrUpdateData(options, result, next);
-
     });
 };
 
@@ -98,12 +96,11 @@ function deleteData (options, next) {
 }
 
 //posts
-function posts (options, all, max_id, next) {
+function posts (user_id, token, all, max_id, next) {
     console.log('updatePosts: '+max_id);
     let postIds = [];
     let existingPostIds = [];
-    let user_id;
-    getNextPosts(options, max_id, function(err, result){
+    getNextPosts(user_id, token, max_id, function(err, result){
         if (err) {
             return next(err.message);
         }
@@ -134,19 +131,19 @@ function posts (options, all, max_id, next) {
                     existingPostIds.push(results[i].id_str);
                 }
             }
-            addOrUpdatePosts( options, data, existingPostIds
+            addOrUpdatePosts( user_id, data, existingPostIds
                 , function(err, result){
                     if(err){
                         return next(err.message);
                     }
                     if( all || existingPostIds.length < data.length){
                         if(max_id > 0) {
-                            posts( options, all, max_id, next )
+                            posts( user_id, token, all, max_id, next )
                         } else {
-                            next(null, options);
+                            next(null, user_id);
                         }
                     } else {
-                        next(null, options);
+                        next(null, user_id);
                     }
                 });
         });
@@ -154,10 +151,11 @@ function posts (options, all, max_id, next) {
     });
 };
 
-function getNextPosts(options, max_id, callback){
-    let params = options;
+function getNextPosts(user_id, token, max_id, callback){
+    let params = { user_id: user_id };
     params.include_rts = 1;
     params.count = POSTS_LIMIT;
+    params.access_token = token;
     if(max_id > 0){
         params.max_id = max_id;
     }
@@ -165,18 +163,16 @@ function getNextPosts(options, max_id, callback){
 }
 
 //add or update posts
-function addOrUpdatePosts (options, posts, existingPostIds, callback) {
+function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
     const connection = db.getConnection();
     let updateQuery = '';
     let insertQuery = '';
     let details;
     let textcontent = '';
     let id, id_str;
-    let user_id;
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
         id_str = posts[i].id_str;
-        user_id = posts[i].user.id_str;
         details = JSON.stringify(posts[i]);
         details = details.replace(/'/g, '`');
         textcontent = (posts[i].text) ? encodeURIComponent(posts[i].text.replace(/\(/iu,"")) : '_';

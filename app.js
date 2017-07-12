@@ -68,9 +68,9 @@ db.init(function(err, connection){
             console.log('twitter updateProfile err='+err);
             console.log('twitter updateProfile user='+JSON.stringify(options));
         });
-        twitter.updatePosts({user_id:'884356029798023173'},'VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', false, function(err, options){
+        twitter.updatePosts('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', false, function(err, id){
             console.log('twitter updatePosts err='+err);
-            console.log('twitter updatePosts user='+JSON.stringify(options));
+            console.log('twitter updatePosts user='+id);
         });
 
         youtube.updateProfile({id:'UC_x5XG1OV2P6uZZ5FSM9Ttw'},'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, options){

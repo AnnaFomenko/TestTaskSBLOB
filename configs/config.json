@@ -29,7 +29,7 @@
   "youtube": {
     "table_name_profile": "youtubeusers",
     "table_name_post": "youtubepost",
-    "api_url":"https://www.googleapis.com/youtube/v3/channels"
+    "api_url":"https://www.googleapis.com/youtube/v3/"
   }
 
 }

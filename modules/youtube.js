@@ -4,20 +4,26 @@ const request = require("request");
 const async = require("async");
 const TABLE_NAME_PROFILE = config.get('youtube:table_name_profile');
 const TABLE_NAME_POST = config.get('youtube:table_name_post');
-const API_URL = config.get('youtube:api_url');
+const POSTS_LIMIT = 50;
 
 exports.updateProfile = function ( id, token, next) {
     profile(id, token, next);
 };
 
+exports.updatePosts = function (id, token, all, next) {
+    let nextUrl = `${config.get("youtube:api_url")}playlistItems?part=snippet%2CcontentDetails${tokenQ}&maxResults=${POSTS_LIMIT}&playlistId=${id}&key=${token}`;
+    console.log(nextUrl);
+    posts(user_id, all, nextUrl, next);
+};
+
 function getStats(id, token, cb){
-    request(API_URL + '?part=statistics&id='+id+'&key='+token, function(err, response, body){
+    request(config.get("youtube:api_url") + 'channels?part=statistics&id='+id+'&key='+token, function(err, response, body){
         cb(err, body);
     });
 }
 
 function getSnippet(id, token, cb){
-    request(API_URL + '?part=snippet&id='+id+'&key='+token, function(err, response, body){
+    request(config.get("youtube:api_url") + 'channels?part=snippet&id='+id+'&key='+token, function(err, response, body){
         cb(err, body);
     });
 }

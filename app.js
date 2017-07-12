@@ -55,14 +55,14 @@ db.init(function(err, connection){
     } else {
         //test
 
-        facebook.updateProfile('901526266540071','EAACEdEose0cBAPXQEpIEDafKrLvPCREbQvEX1THz2z0WeZAHoVUVa5Dv7J7pso8A4odYk58Q1NsZCc9AX9m0ZCQ59083aJ3eeZC6KNOsZCxFZCbqEvzQeLzniwTvbGm0XkeUgVN3gTEyPVvrCLz0DczEBcpTbDVgqgjNrwFuK5WdvdTZBZByxs5jPyKNxcBHtH8ZD',  function(err, id){
+        facebook.updateProfile('berniesanders','EAACEdEose0cBACqd2kYYy75cES0nN09EXcUzYcYSIIVtGPdCB35SZAgD1aqVMqRtlpleHAzMfV2NaMqiCXmm1xBUpsyhCwAyQrmZAQqKUSCmcDPzzi7RVENj9zh8T0QoFfAuFH1Ifntj5XYgqsRbSrK11IounZAQgSaKCctcHCI4LEA9rHN4AuezAHjpqgZD',  function(err, id){
             if(err){
                 console.log('facebook updateProfile err='+err);
             } else {
                 console.log('facebook updateProfile userId='+id);
             }
         });
-        facebook.updatePosts('901526266540071', 'EAACEdEose0cBAPXQEpIEDafKrLvPCREbQvEX1THz2z0WeZAHoVUVa5Dv7J7pso8A4odYk58Q1NsZCc9AX9m0ZCQ59083aJ3eeZC6KNOsZCxFZCbqEvzQeLzniwTvbGm0XkeUgVN3gTEyPVvrCLz0DczEBcpTbDVgqgjNrwFuK5WdvdTZBZByxs5jPyKNxcBHtH8ZD', true, function(err, id){
+        facebook.updatePosts('901526266540071', 'EAACEdEose0cBAPXQEpIEDafKrLvPCREbQvEX1THz2z0WeZAHoVUVa5Dv7J7pso8A4odYk58Q1NsZCc9AX9m0ZCQ59083aJ3eeZC6KNOsZCxFZCbqEvzQeLzniwTvbGm0XkeUgVN3gTEyPVvrCLz0DczEBcpTbDVgqgjNrwFuK5WdvdTZBZByxs5jPyKNxcBHtH8ZD', false, function(err, id){
             if(err){
                 console.log('facebook updatePosts err='+err);
             } else {

@@ -8,13 +8,14 @@ const PAGE = 'page';
 const TABLE_NAME_PROFILE = config.get('facebook:table_name_profile');
 const TABLE_NAME_POST = config.get('facebook:table_name_post');
 const POSTS_LIMIT = 50;
+graph.setVersion('2.9');
 
 exports.updateProfile = function ( user_id, token, next) {
     profile(user_id, token, next);
 };
 
 exports.updatePosts = function ( user_id, token, all, next) {
-    let nextUrl = `${config.get("facebook:api_url")}${user_id}/posts?fields=reactions.limit(0).summary(true),comments.limit(0).summary(true),application,full_picture,caption,description,icon,is_hidden,is_published,message_tags,name,object_id,parent_id,permalink_url,picture,privacy,properties,source,status_type,story,story_tags,updated_time,type,shares,link,message,created_time,likes.limit(0).summary(true)&limit=${POSTS_LIMIT}&access_token=${token}`;
+    let nextUrl = `${config.get("facebook:api_url")}/${user_id}/posts?fields=reactions.limit(0).summary(true),comments.limit(0).summary(true),application,full_picture,caption,description,icon,is_hidden,is_published,message_tags,name,object_id,parent_id,permalink_url,picture,privacy,properties,source,status_type,story,story_tags,updated_time,type,shares,link,message,created_time,likes.limit(0).summary(true)&limit=${POSTS_LIMIT}&access_token=${token}`;
     posts(user_id, all, nextUrl, next);
 };
 

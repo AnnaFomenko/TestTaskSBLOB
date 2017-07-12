@@ -97,7 +97,7 @@ function deleteData (options, next) {
 
 //posts
 function posts (user_id, token, all, max_id, next) {
-    console.log('updatePosts: '+max_id);
+    console.log('twitter posts max_id='+max_id);
     let postIds = [];
     let existingPostIds = [];
     getNextPosts(user_id, token, max_id, function(err, result){

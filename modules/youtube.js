@@ -139,7 +139,7 @@ function deleteData (id, next) {
 
 //posts
 function posts (user_id, token, all, nextPageToken, next) {
-    console.log('updatePosts: '+nextPageToken);
+    console.log('youtube posts nextUrl='+nextPageToken);
     //playlistId is always the userId.replace('UC', 'UU')
     let playlistId = user_id.replace('UC', 'UU');;
     let postIds = [];

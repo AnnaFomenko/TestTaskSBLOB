@@ -103,7 +103,7 @@ function deleteData (id, next) {
 
 //posts
 function posts (user_id, all, nextUrl, next) {
-    console.log('post'+nextUrl);
+    console.log('facebook posts nextUrl='+nextUrl);
     let postIds = [];
     let existingPostIds = [];
     getNextPosts(nextUrl, function(err, result){

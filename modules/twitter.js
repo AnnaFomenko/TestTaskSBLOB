@@ -11,13 +11,13 @@ const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
 const POSTS_LIMIT = 50;
 
 exports.updateProfile = function (options, token, next) {
-    twitter.setAuth(token);
+    options.access_token = token;
     profile(options, next);
 };
 
 exports.updatePosts = function (options, token, all, next) {
     let max_id = 0;
-    twitter.setAuth(token);
+    options.access_token = token;
     posts(options, all, max_id, next);
 };
 
@@ -30,8 +30,6 @@ function profile (options, next) {
             }
             return next(err.message);
         }
-
-
         if(!result){
             return next(errors.emptyResult);
         }

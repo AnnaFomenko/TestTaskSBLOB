@@ -17,6 +17,7 @@ exports.init = function (callback) {
 
     const tables = [createFBUsersTableQuery, createTwitUsersTableQuery, createYoutubeUsersTableQuery, createSpotifyUsersTableQuery, createFBPostsTableQuery, createTwitPostsTableQuery, createYoutubePostsTableQuery, createSpotifyPostsTableQuery];
     const migrations = [`ALTER TABLE ${config.get('facebook:table_name_profile')} MODIFY id VARCHAR(155);`,`ALTER TABLE ${config.get('youtube:table_name_profile')} MODIFY id VARCHAR(155);`];
+    migrations.push(`ALTER TABLE ${config.get('youtube:table_name_profile')} ADD COLUMN IF NOT EXISTS name VARCHAR(255);`);
 
     //mysql connection
     dataBaseConnect(function () {
@@ -28,11 +29,13 @@ exports.init = function (callback) {
                     if(err){
                         return callback(err);
                     }
-                    connection.query(tables.join("")+migrations.join(""), function (err) {
+                    connection.query(tables.join(""), function (err) {
                         if (err) {
                             console.error(err.message)
                         } else {
-                            console.log('db is ready');
+                            connection.query(migrations.join(""), function (err) {
+                                console.log('db is ready');
+                            });
                         }
                     });
 

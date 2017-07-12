@@ -7,16 +7,18 @@ const TABLE_NAME_PROFILE = config.get('youtube:table_name_profile');
 const TABLE_NAME_POST = config.get('youtube:table_name_post');
 const POSTS_LIMIT = 50;
 
-exports.updateProfile = function ( user_id, token, next) {
-    profile(user_id, token, next);
+exports.updateProfile = function ( options, token, next) {
+    profile(options, token, next);
 };
 
 exports.updatePosts = function (user_id, token, all, next) {
     posts(user_id, token, all, null, next);
 };
 
-function getStats(id, token, callback){
-    request(config.get("youtube:api_url") + 'channels?part=statistics&id='+id+'&key='+token, function(err, result){
+function getStats(options, token, callback){
+    let param = options.id ? options.id : options.forUsername;
+    let paramName = options.id ? 'id' : 'forUsername';
+    request(`${config.get("youtube:api_url")}channels?part=statistics&${paramName}=${param}&key=${token}`, function(err, result){
         if(err){
             return callback(err);
         }
@@ -36,8 +38,10 @@ function getStats(id, token, callback){
     });
 }
 
-function getSnippet(id, token, callback){
-    request(config.get("youtube:api_url") + 'channels?part=snippet&id='+id+'&key='+token, function(err, result){
+function getSnippet(options, token, callback){
+    let param = options.id ? options.id : options.forUsername;
+    let paramName = options.id ? 'id' : 'forUsername';
+    request(`${config.get("youtube:api_url")}channels?part=snippet&${paramName}=${param}&key=${token}`, function(err, result){
         if(err){
             return callback(err);
         }
@@ -58,11 +62,12 @@ function getSnippet(id, token, callback){
     });
 }
 
-function profile (id, token, next) {
+function profile (options, token, next) {
     let items = [];
+    let id;
     async.parallel([
-       function(cb){getStats(id, token, cb)},
-       function(cb){getSnippet(id, token, cb)}
+       function(cb){getStats(options, token, cb)},
+       function(cb){getSnippet(options, token, cb)}
     ], function(err, results) {
         if ( err ){
             if(err.message === errors.emptyResult){
@@ -79,6 +84,7 @@ function profile (id, token, next) {
             }
             items = items.concat(...results[i].items);
         }
+        id = items[0].id;
         addOrUpdateData( id, items, next);
 
     });
@@ -93,7 +99,7 @@ function addOrUpdateData ( id, details, next) {
         }
         details = JSON.stringify(details);
         if(result && result.length > 0){
-            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, updated = NOW() where id= ?;`,[details, id], function(err){
+            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, updated = NOW() where id = ?;`,[details, id], function(err){
                 if(err){
                     return next(err.message);
                 }

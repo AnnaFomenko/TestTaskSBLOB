@@ -73,13 +73,13 @@ db.init(function(err, connection){
             console.log('twitter updatePosts user='+JSON.stringify(options));
         });
 
-        youtube.updateProfile('UC_x5XG1OV2P6uZZ5FSM9Ttw','AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, options){
+        youtube.updateProfile({id:'UC_x5XG1OV2P6uZZ5FSM9Ttw'},'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, options){
             console.log('youtube updateProfile err='+err);
             console.log('youtube updateProfile user='+JSON.stringify(options));
         });
-        youtube.updatePosts('UC_x5XG1OV2P6uZZ5FSM9Ttw', 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', false, function(err, options){
+        youtube.updatePosts('UC_x5XG1OV2P6uZZ5FSM9Ttw', 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', false, function(err, id){
             console.log('youtube updatePosts err='+err);
-            console.log('youtube updatePosts user='+JSON.stringify(options));
+            console.log('youtube updatePosts user='+id);
         });
 
         spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', function(err, id){

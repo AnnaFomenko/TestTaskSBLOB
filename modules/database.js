@@ -15,9 +15,32 @@ exports.init = function (callback) {
     const createYoutubePostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id VARCHAR(155),  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
     const createSpotifyPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id VARCHAR(155),  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
 
-    const tables = [createFBUsersTableQuery, createTwitUsersTableQuery, createYoutubeUsersTableQuery, createSpotifyUsersTableQuery, createFBPostsTableQuery, createTwitPostsTableQuery, createYoutubePostsTableQuery, createSpotifyPostsTableQuery];
+    const createFBSearchTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('facebook:table_name_search')} (id BIGINT UNSIGNED AUTO_INCREMENT, PRIMARY KEY(id), query VARCHAR(2048), item_id VARCHAR(155), search_result LONGBLOB, filter VARCHAR(8), updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createTwitSearchTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('twitter:table_name_search')} (id BIGINT UNSIGNED AUTO_INCREMENT, PRIMARY KEY(id), query VARCHAR(2048), item_id VARCHAR(155), search_result LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createYoutubeSearchTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_search')} (id BIGINT UNSIGNED AUTO_INCREMENT, PRIMARY KEY(id), query VARCHAR(2048), item_id VARCHAR(155), search_result LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+    const createSpotifySearchTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_search')} (id BIGINT UNSIGNED AUTO_INCREMENT, PRIMARY KEY(id), query VARCHAR(2048), item_id VARCHAR(155), search_result LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
+
+    const tables = [
+        createFBUsersTableQuery,
+        createTwitUsersTableQuery,
+        createYoutubeUsersTableQuery,
+        createSpotifyUsersTableQuery,
+        createFBPostsTableQuery,
+        createTwitPostsTableQuery,
+        createYoutubePostsTableQuery,
+        createSpotifyPostsTableQuery,
+        createFBSearchTableQuery,
+        createTwitSearchTableQuery,
+        createYoutubeSearchTableQuery,
+        createSpotifySearchTableQuery
+    ];
     const migrations = [`ALTER TABLE ${config.get('facebook:table_name_profile')} MODIFY id BIGINT UNSIGNED;`, `ALTER TABLE ${config.get('youtube:table_name_profile')} MODIFY id VARCHAR(155);`];
-    migrations.push(`ALTER TABLE ${config.get('youtube:table_name_profile')} ADD COLUMN IF NOT EXISTS name VARCHAR(255);`);
+    migrations.push(`ALTER DATABASE ${config.get('mysql:db')} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;`);
+    migrations.push(`ALTER TABLE ${config.get('facebook:table_name_post')} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+    migrations.push(`ALTER TABLE ${config.get('twitter:table_name_post')} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+    migrations.push(`ALTER TABLE ${config.get('youtube:table_name_post')} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+    migrations.push(`ALTER TABLE ${config.get('spotify:table_name_post')} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+
 
     //mysql connection
     dataBaseConnect(function () {
@@ -34,6 +57,7 @@ exports.init = function (callback) {
                             console.error(err.message)
                         } else {
                             connection.query(migrations.join(""), function (err) {
+                                console.log(err);
                                 console.log('db is ready');
                             });
                         }

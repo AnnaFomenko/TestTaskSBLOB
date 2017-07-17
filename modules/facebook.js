@@ -7,7 +7,8 @@ const PROFILE = 'profile';
 const PAGE = 'page';
 const TABLE_NAME_PROFILE = config.get('facebook:table_name_profile');
 const TABLE_NAME_POST = config.get('facebook:table_name_post');
-const POSTS_LIMIT = 50;
+const TABLE_NAME_SEARCH = config.get('facebook:table_name_search');
+const LIMIT = 50;
 graph.setVersion('2.9');
 
 exports.updateProfile = function ( user_id, token, next) {
@@ -17,6 +18,11 @@ exports.updateProfile = function ( user_id, token, next) {
 exports.updatePosts = function ( user_id, token, all, next) {
     let nextUrl = `${config.get("facebook:api_url")}/${user_id}/posts?fields=reactions.limit(0).summary(true),comments.limit(0).summary(true),application,full_picture,caption,description,icon,is_hidden,is_published,message_tags,name,object_id,parent_id,permalink_url,picture,privacy,properties,source,status_type,story,story_tags,updated_time,type,shares,link,message,created_time,likes.limit(0).summary(true)&limit=${POSTS_LIMIT}&access_token=${token}`;
     posts(user_id, all, nextUrl, next);
+};
+
+// filter - page or user
+exports.search = function (q, filter, page, token, next) {
+    search(q, filter, page, token, next);
 };
 
 //profile
@@ -34,7 +40,7 @@ function profile (id, token, next) {
             }
             addOrUpdateData(id, result, next, PROFILE);
     });
-};
+}
 
 function page (id, token, next) {
     graph.get(id+'?fields=id,about,cover,birthday,link,picture,website,name,is_verified,location,hometown,fan_count'
@@ -123,14 +129,14 @@ function posts (user_id, all, nextUrl, next) {
         let data = result.data;
         if(data.length > 0){
             for(let i = data.length-1; i >=0 ; i--){
-                if(postIds.indexOf(data[i].id)!=-1){
+                if(postIds.indexOf(data[i].id) !== -1){
                     data.splice(i, 1);
                     continue;
                 }
                 postIds.push(data[i].id)
             }
         }
-        if(postIds.length == 0){
+        if(postIds.length === 0){
             return next(null, user_id);
         }
         checkExistingPosts(postIds, function(err, results){
@@ -157,7 +163,7 @@ function posts (user_id, all, nextUrl, next) {
         });
 
     });
-};
+}
 
 function getNextPosts(nextUrl, callback){
     request(nextUrl, function(err, result){
@@ -190,7 +196,7 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
         details = JSON.stringify(posts[i]);
         details = details.replace(/'/g, '`');
         textcontent = (posts[i].message) ? encodeURIComponent(posts[i].message.replace(/[':()/!|\/]/iug, "")) : '_';
-        if(existingPostIds.indexOf(posts[i].id) != -1){
+        if(existingPostIds.indexOf(posts[i].id) !== -1){
             updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = ${user_id}, updated = NOW() where id = '${id}';`;
         } else {
             insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', '${details}', '${textcontent}', ${user_id});`;
@@ -205,4 +211,74 @@ function checkExistingPosts(postIds, callback){
         function(err, result){
             callback(err, result);
         });
+};
+
+//search
+function search (q, filter, page, token, next) {
+    let existingItemsIds = [];
+    let offset = page*LIMIT;
+    graph.get('search'
+        , { access_token: token, type: filter, limit:LIMIT, q: q, offset: offset}, function(err, result) {
+            if (err) {
+                return next(err.message);
+            }
+            if(!result){
+                return next(errors.emptyResult);
+            }
+            next(null, result.data);
+            let itemsIds = [];
+            for(let i = result.data.length-1; i >= 0 ; i--){
+                if(itemsIds.indexOf(result.data[i].id) !== -1){
+                    result.data.splice(i, 1);
+                    continue;
+                }
+                itemsIds.push(result.data[i].id);
+            }
+            if(itemsIds.length>0){
+                checkExistingItems(q, filter, itemsIds, function(err, results){
+                    if(err){
+                        return console.error(err);
+                    }
+                    if(results && results.length>0) {
+                        for (let i = 0; i < results.length; i++) {
+                            existingItemsIds.push(results[i].item_id);
+                        }
+                    }
+                    addSearchItems (q, filter, result.data, existingItemsIds, function(err){
+                        if(err){
+                            console.error(err);
+                        }
+                    })
+                });
+            }
+        });
+}
+
+function checkExistingItems(q, filter, itemsIds, callback){
+    const connection = db.getConnection();
+    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = '${q}' and filter = '${filter}';`,
+        function(err, result){
+            callback(err, result);
+        });
+}
+
+//add search items
+function addSearchItems (q, filter, items, existingStatusIds, callback) {
+    const connection = db.getConnection();
+    let updateQuery = '';
+    let insertQuery = '';
+    let details;
+    let id;
+    q = connection.escape(q);
+    filter = connection.escape(filter);
+    for(let i = 0; i < items.length; i++){
+        id = items[i].id;
+        details = connection.escape(JSON.stringify(items[i]));
+        if(existingStatusIds.indexOf(id) !== -1){
+            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q};`;
+        } else {
+            insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query, filter ) VALUES ('${id}', ${details}, ${q}, ${filter});`;
+        }
+    }
+    connection.query(updateQuery+insertQuery, callback);
 }

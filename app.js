@@ -55,18 +55,26 @@ db.init(function(err, connection){
     } else {
         //test
 
-        facebook.updateProfile('berniesanders','EAACEdEose0cBACqd2kYYy75cES0nN09EXcUzYcYSIIVtGPdCB35SZAgD1aqVMqRtlpleHAzMfV2NaMqiCXmm1xBUpsyhCwAyQrmZAQqKUSCmcDPzzi7RVENj9zh8T0QoFfAuFH1Ifntj5XYgqsRbSrK11IounZAQgSaKCctcHCI4LEA9rHN4AuezAHjpqgZD',  function(err, id){
+        //facebook.updateProfile('berniesanders','EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD',  function(err, id){
+            //if(err){
+               //console.log('facebook updateProfile err='+err);
+            //} else {
+                //console.log('facebook updateProfile userId='+id);
+            //}
+        //});
+        //facebook.updatePosts('901526266540071', 'EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD', false, function(err, id){
+            //if(err){
+                //console.log('facebook updatePosts err='+err);
+           // } else {
+               // console.log('facebook updatePosts userId='+id);
+            //}
+        //});
+
+        facebook.search('hot summer', 'page', 5, 'EAACEdEose0cBAGWGJ3rH5QydZAI4weCHAJxTNkWYvZBx0MVoK9BZBZBhe23gF600hSQl5KDTfskBb23IOkTuqQJokHjM3HUUw7RUd7YNXP5XzcZB1sdGm3jCE6pIurRcRCi4aZAi02MZBjkbWFu0Wrb6ghR1b6e0L28cxKJ8KFdZAbwgLAkz2i2FSJl6oYDCE94ZD', function(err, result){
             if(err){
-                console.log('facebook updateProfile err='+err);
+                console.log('facebook search err='+err);
             } else {
-                console.log('facebook updateProfile userId='+id);
-            }
-        });
-        facebook.updatePosts('901526266540071', 'EAACEdEose0cBAPXQEpIEDafKrLvPCREbQvEX1THz2z0WeZAHoVUVa5Dv7J7pso8A4odYk58Q1NsZCc9AX9m0ZCQ59083aJ3eeZC6KNOsZCxFZCbqEvzQeLzniwTvbGm0XkeUgVN3gTEyPVvrCLz0DczEBcpTbDVgqgjNrwFuK5WdvdTZBZByxs5jPyKNxcBHtH8ZD', false, function(err, id){
-            if(err){
-                console.log('facebook updatePosts err='+err);
-            } else {
-                console.log('facebook updatePosts userId='+id);
+                console.log('facebook search results='+JSON.stringify(result));
             }
         });
 
@@ -77,14 +85,20 @@ db.init(function(err, connection){
                 console.log('twitter updateProfile user='+JSON.stringify(options));
             }
         });
-        twitter.updatePosts('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', false, function(err, id){
+        twitter.updatePosts('884356029798023173','VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', true, function(err, id){
             if(err){
                 console.log('twitter updatePosts err='+err);
             } else {
                 console.log('twitter updatePosts user='+id);
             }
         });
-
+        twitter.search('twitter', 2, 'VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(err, result){
+             if(err){
+                console.log('twitter search err='+err);
+             } else {
+                 console.log('twitter search result='+JSON.stringify(result));
+             }
+        });
         youtube.updateProfile({id:'UC_x5XG1OV2P6uZZ5FSM9Ttw'},'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, options){
             if(err){
                 console.log('youtube updateProfile err='+err);
@@ -99,22 +113,35 @@ db.init(function(err, connection){
                 console.log('youtube updatePosts userId='+id);
             }
         });
+        /*youtube.search('summer', 10, 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, result){
+            if(err){
+                console.log('youtube search err='+err);
+            } else {
+                console.log('youtube search result='+JSON.stringify(result));
+            }
+        });*/
 
-        spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', function(err, id){
+        /*spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQAUOwdRe0zW-sWqUJqHOwVU9HWA0aHQT7YcHyOWbw2J6VwCpVzLmOdUS43kQnYxYcDq5WQX7Fjt3VdHjfk5uTpclYs9bY2vh3xqn7m4l8zf15z4fVchrNcBcEs0rAJIkY3pEdMTW3rzz4FCkUBrnPFzbh63aUR5xSINWeKFhA7oGbjCUktquVufxaGFCjsvTA8k1OQ8F9WuIgl3-szn03b46oQAJQ8gvM5nxIaULlFOf9C1NKR625yw75Tw9nS6xt483KG2K3gNfT0nu6W7Sdd1gHqLXCFkjn0sYClkrUEy7E5NPBEV2lGr8EBMkx0-RUS7QAfdqSABGCzb8ukr0Q', function(err, id){
             if(err){
                 console.log('spotify updateProfile err ='+err);
             } else {
                 console.log('spotify updateProfile userId='+id);
             }
         });
-        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQBSGQ3hcIKRmHXTelidpMexS7HaQK9LRDTAMWINxk4eUJKEv8s4rd7-LXjTlh7V_id3_4sH7jUWidLKUi7RqVihGkhIGktFbaWsrgPer0gMAhdAr1zG8mxkW6yYyWvN-In_vMX9NvBdVzoTmB9EIKbso_bvUQg', false, function(err, id){
+        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQAUOwdRe0zW-sWqUJqHOwVU9HWA0aHQT7YcHyOWbw2J6VwCpVzLmOdUS43kQnYxYcDq5WQX7Fjt3VdHjfk5uTpclYs9bY2vh3xqn7m4l8zf15z4fVchrNcBcEs0rAJIkY3pEdMTW3rzz4FCkUBrnPFzbh63aUR5xSINWeKFhA7oGbjCUktquVufxaGFCjsvTA8k1OQ8F9WuIgl3-szn03b46oQAJQ8gvM5nxIaULlFOf9C1NKR625yw75Tw9nS6xt483KG2K3gNfT0nu6W7Sdd1gHqLXCFkjn0sYClkrUEy7E5NPBEV2lGr8EBMkx0-RUS7QAfdqSABGCzb8ukr0Q', false, function(err, id){
             if(err){
                 console.log('spotify updatePosts err ='+err);
             } else {
                 console.log('spotify updatePosts userId='+id);
             }
+        })*/
+        spotify.search('lalalala', 10, 'BQAUOwdRe0zW-sWqUJqHOwVU9HWA0aHQT7YcHyOWbw2J6VwCpVzLmOdUS43kQnYxYcDq5WQX7Fjt3VdHjfk5uTpclYs9bY2vh3xqn7m4l8zf15z4fVchrNcBcEs0rAJIkY3pEdMTW3rzz4FCkUBrnPFzbh63aUR5xSINWeKFhA7oGbjCUktquVufxaGFCjsvTA8k1OQ8F9WuIgl3-szn03b46oQAJQ8gvM5nxIaULlFOf9C1NKR625yw75Tw9nS6xt483KG2K3gNfT0nu6W7Sdd1gHqLXCFkjn0sYClkrUEy7E5NPBEV2lGr8EBMkx0-RUS7QAfdqSABGCzb8ukr0Q', function(err, result){
+            if(err){
+                console.log('spotify search err ='+err);
+            } else {
+                console.log('spotify search result='+JSON.stringify(result));
+            }
         })
-
 
     }
 });

@@ -4,19 +4,23 @@ const db = require("./database");
 const errors = require("./errors");
 const TABLE_NAME_PROFILE = config.get('spotify:table_name_profile');
 const TABLE_NAME_POST = config.get('spotify:table_name_post');
-const POSTS_LIMIT = 50;
+const LIMIT = 50;
 
 exports.updateProfile = function ( id, token, next ) {
     profile(id, token, next);
 };
 
 exports.updatePosts = function ( user_id, token, all, next) {
-    let nextUrl = `${config.get("spotify:api_url")}${user_id}/albums?limit=${POSTS_LIMIT}&access_token=${token}`;
+    let nextUrl = `${config.get("spotify:api_url")}artists/${user_id}/albums?limit=${LIMIT}&access_token=${token}`;
     posts(user_id, token, all, nextUrl, next);
 };
 
+exports.search = function (q, page, token, next) {
+    search(q, page, token, next);
+};
+
 function profile (id, token, next) {
-    request(config.get('spotify:api_url') + id + '?access_token=' + token , function(err, result){
+    request(`${config.get('spotify:api_url')}artists/${id}?access_token=${token}' + ` , function(err, result){
         let body = null;
         if( result.body ){
             try{
@@ -142,7 +146,7 @@ function posts (user_id, token,  all, nextUrl, next) {
         });
 
     });
-};
+}
 
 function getNextPosts(nextUrl, callback){
     request(nextUrl, function(err, result){
@@ -173,7 +177,7 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
         details = details.replace(/'/g, '`');
         //TODO write util functions
         textcontent = (posts[i].name) ? encodeURIComponent(posts[i].name.replace(/[':()/!|\/]/iug, "")) : '';
-        if(existingPostIds.indexOf(posts[i].id) != -1){
+        if(existingPostIds.indexOf(posts[i].id) !== -1){
             updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = '${user_id}', updated = NOW() where id = '${id}';`;
         } else {
             insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', '${details}', '${textcontent}', '${user_id}');`;
@@ -188,4 +192,27 @@ function checkExistingPosts(postIds, callback){
         function(err, result){
             callback(err, result);
         });
+}
+
+//search
+function search (q, page, token, next) {
+    let offset = page*LIMIT;
+    request(`${config.get('spotify:api_url')}search?q=${q}&access_token=${token}&limit=${LIMIT}&offset=${offset}&type=track,artist,album,playlist` , function(err, result){
+        let body = null;
+        if( result.body ){
+            try{
+                body = JSON.parse(result.body);
+                err = body.error;
+            } catch(error){
+                err = error;
+            }
+        }
+        if (err) {
+            return next(err.message);
+        }
+        if(!body){
+            return next(errors.emptyResult);
+        }
+        next(null, body);
+    });
 }

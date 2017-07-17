@@ -5,7 +5,7 @@ const errors = require("./errors");
 const async = require("async");
 const TABLE_NAME_PROFILE = config.get('youtube:table_name_profile');
 const TABLE_NAME_POST = config.get('youtube:table_name_post');
-const POSTS_LIMIT = 50;
+const LIMIT = 50;
 
 exports.updateProfile = function ( options, token, next) {
     profile(options, token, next);
@@ -13,6 +13,11 @@ exports.updateProfile = function ( options, token, next) {
 
 exports.updatePosts = function (user_id, token, all, next) {
     posts(user_id, token, all, null, next);
+};
+
+// filter - page or user
+exports.search = function (q, page, token, next) {
+    search(q, page, token, next);
 };
 
 function getStats(options, token, callback){
@@ -141,10 +146,10 @@ function deleteData (id, next) {
 function posts (user_id, token, all, nextPageToken, next) {
     console.log('youtube posts nextUrl='+nextPageToken);
     //playlistId is always the userId.replace('UC', 'UU')
-    let playlistId = user_id.replace('UC', 'UU');;
+    let playlistId = user_id.replace('UC', 'UU');
     let postIds = [];
     let existingPostIds = [];
-    let nextUrl = `${config.get("youtube:api_url")}playlistItems?part=snippet%2CcontentDetails&maxResults=${POSTS_LIMIT}&playlistId=${playlistId}&key=${token}`;
+    let nextUrl = `${config.get("youtube:api_url")}playlistItems?part=snippet%2CcontentDetails&maxResults=${LIMIT}&playlistId=${playlistId}&key=${token}`;
     if(nextPageToken){
          nextUrl += `&pageToken=${nextPageToken}`;
     }
@@ -163,14 +168,14 @@ function posts (user_id, token, all, nextPageToken, next) {
         let data = result.items;
         if(data.length > 0){
             for(let i = data.length-1; i >=0 ; i--){
-                if(postIds.indexOf(data[i].id) != -1){
+                if(postIds.indexOf(data[i].id) !== -1){
                     data.splice(i, 1);
                     continue;
                 }
                 postIds.push(data[i].id)
             }
         }
-        if(postIds.length == 0){
+        if(postIds.length === 0){
             return next(null, user_id);
         }
         checkExistingPosts(postIds, function(err, results){
@@ -197,7 +202,7 @@ function posts (user_id, token, all, nextPageToken, next) {
         });
 
     });
-};
+}
 
 function getNextPosts(nextUrl, callback){
     request(nextUrl, function(err, result){
@@ -243,4 +248,72 @@ function checkExistingPosts(postIds, callback){
         function(err, result){
             callback(err, result);
         });
+}
+
+//search
+function search(q, page, token, callback){
+    let pageToken = '';
+    let pageCount = 0;
+    getPageToken(q, page, pageCount, pageToken, token, function (err, nextPageToken){
+        if(err){
+            return callback(err)
+        } else {
+            pageToken = nextPageToken;
+            request(`${config.get("youtube:api_url")}search?part=snippet&q=${q}&key=${token}&maxResults=${LIMIT}&pageToken=${pageToken}`, function(err, result){
+                if(err){
+                    return callback(err);
+                }
+                let body = null;
+                if( result.body ){
+                    try{
+                        body = JSON.parse(result.body);
+                        err = body.error;
+                        if(!err && body.pageInfo.totalResults === 0){
+                            err = new Error(errors.emptyResult);
+                        }
+                    } catch(error){
+                        err = error;
+                    }
+                }
+                callback(err, body);
+            });
+        }
+    });
+}
+
+function getPageToken(q, page, pageCount, pageToken, token, callback){
+    if(page === 0){
+        return callback(null, '');
+    }
+    request(`${config.get("youtube:api_url")}search?part=snippet&q=${q}&key=${token}&maxResults=${LIMIT}&fields=nextPageToken&pageToken=${pageToken}`, function(err, result){
+        if(err){
+            return callback(err);
+        }
+        let body = null;
+        if( result.body ){
+            try{
+                body = JSON.parse(result.body);
+                err = body.error;
+                if(err){
+                    return  callback(err.message)
+                }
+                pageCount ++;
+                if(body.nextPageToken){
+                    if(page == pageCount){
+                        callback(null, body.nextPageToken);
+                    } else {
+                        getPageToken(q, page, pageCount, body.nextPageToken, token, callback);
+                    }
+                }else{
+                    callback(errors.emptyResult)
+                }
+
+            } catch(error){
+                err = error;
+                callback(err.message)
+            }
+        } else {
+            callback(errors.emptyResult)
+        }
+    });
 }

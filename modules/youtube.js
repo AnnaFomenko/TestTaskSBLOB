@@ -5,6 +5,7 @@ const errors = require("./errors");
 const async = require("async");
 const TABLE_NAME_PROFILE = config.get('youtube:table_name_profile');
 const TABLE_NAME_POST = config.get('youtube:table_name_post');
+const TABLE_NAME_SEARCH = config.get('youtube:table_name_search');
 const LIMIT = 50;
 
 exports.updateProfile = function ( options, token, next) {
@@ -229,14 +230,13 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
     let id;
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
-        details = JSON.stringify(posts[i]);
-        details = details.replace(/'/g, '`');
+        details = connection.escape(JSON.stringify(posts[i]));
         //TODO write util functions
-        textcontent = (posts[i].title) ? encodeURIComponent(posts[i].title.replace(/[':()/!|\/]/iug, "")) : '';
-        if(existingPostIds.indexOf(posts[i].id) != -1){
-            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = '${user_id}', updated = NOW() where id = '${id}';`;
+        textcontent = connection.escape(posts[i].title);
+        if(existingPostIds.indexOf(posts[i].id) !== -1){
+            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent}, user_id = '${user_id}' where id = '${id}';`;
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', '${details}', '${textcontent}', '${user_id}');`;
+            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', ${details}, ${textcontent}, '${user_id}');`;
         }
     }
     connection.query(updateQuery+insertQuery, callback);
@@ -268,7 +268,7 @@ function search(q, page, token, callback){
                     try{
                         body = JSON.parse(result.body);
                         err = body.error;
-                        if(!err && body.pageInfo.totalResults === 0){
+                        if(!err && body.pageInfo && body.pageInfo.totalResults === 0){
                             err = new Error(errors.emptyResult);
                         }
                     } catch(error){
@@ -276,6 +276,31 @@ function search(q, page, token, callback){
                     }
                 }
                 callback(err, body);
+                let itemsIds = [];
+                for(let i = body.items.length-1; i >= 0 ; i--){
+                    if(itemsIds.indexOf(body.items[i].id) !== -1){
+                        body.items.splice(i, 1);
+                        continue;
+                    }
+                    itemsIds.push(body.items[i].id);
+                }
+                if(itemsIds.length > 0) {
+                    checkExistingItems(q, itemsIds, function(err, results){
+                        if(err){
+                            return console.error(err);
+                        }
+                        if(results && results.length > 0) {
+                            for (let i = 0; i < results.length; i++) {
+                                existingItemsIds.push(results[i].item_id);
+                            }
+                        }
+                        addSearchItems (q, body.items, existingItemsIds, function(err){
+                            if(err){
+                                console.error(err);
+                            }
+                        })
+                    });
+                }
             });
         }
     });
@@ -299,7 +324,7 @@ function getPageToken(q, page, pageCount, pageToken, token, callback){
                 }
                 pageCount ++;
                 if(body.nextPageToken){
-                    if(page == pageCount){
+                    if(page === pageCount){
                         callback(null, body.nextPageToken);
                     } else {
                         getPageToken(q, page, pageCount, body.nextPageToken, token, callback);
@@ -316,4 +341,33 @@ function getPageToken(q, page, pageCount, pageToken, token, callback){
             callback(errors.emptyResult)
         }
     });
+}
+
+function checkExistingItems(q, filter, itemsIds, callback){
+    const connection = db.getConnection();
+    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = '${q}' and filter = '${filter}';`,
+        function(err, result){
+            callback(err, result);
+        });
+}
+
+//add search items
+function addSearchItems (q, filter, items, existingStatusIds, callback) {
+    const connection = db.getConnection();
+    let updateQuery = '';
+    let insertQuery = '';
+    let details;
+    let id;
+    q = connection.escape(q);
+    filter = connection.escape(filter);
+    for(let i = 0; i < items.length; i++){
+        id = items[i].id;
+        details = connection.escape(JSON.stringify(items[i]));
+        if(existingStatusIds.indexOf(id) !== -1){
+            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q};`;
+        } else {
+            insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query, filter ) VALUES ('${id}', ${details}, ${q}, ${filter});`;
+        }
+    }
+    connection.query(updateQuery+insertQuery, callback);
 }

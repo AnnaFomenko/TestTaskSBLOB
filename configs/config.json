@@ -2,8 +2,8 @@
   "mysql": {
     "host": "localhost",
     "port":3306,
-    "user": "user",
-    "password": "pass",
+    "user": "root",
+    "password": "",
     "db": "blobtest",
     "multipleStatements": true
   },

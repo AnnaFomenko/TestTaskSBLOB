@@ -4,6 +4,7 @@ const db = require("./database");
 const errors = require("./errors");
 const TABLE_NAME_PROFILE = config.get('spotify:table_name_profile');
 const TABLE_NAME_POST = config.get('spotify:table_name_post');
+const TABLE_NAME_SEARCH = config.get('spotify:table_name_search');
 const LIMIT = 50;
 
 exports.updateProfile = function ( id, token, next ) {
@@ -214,5 +215,58 @@ function search (q, page, token, next) {
             return next(errors.emptyResult);
         }
         next(null, body);
+        let itemsIds = [];
+        for(let i = result.data.length-1; i >= 0 ; i--){
+            if(itemsIds.indexOf(result.data[i].id) !== -1){
+                result.data.splice(i, 1);
+                continue;
+            }
+            itemsIds.push(result.data[i].id);
+        }
+        if(itemsIds.length>0){
+            checkExistingItems(q, itemsIds, function(err, results){
+                if(err){
+                    return console.error(err);
+                }
+                if(results && results.length>0) {
+                    for (let i = 0; i < results.length; i++) {
+                        existingItemsIds.push(results[i].item_id);
+                    }
+                }
+                addSearchItems (q, result.data, existingItemsIds, function(err){
+                    if(err){
+                        console.error(err);
+                    }
+                })
+            });
+        }
     });
+}
+
+function checkExistingItems(q, itemsIds, callback){
+    const connection = db.getConnection();
+    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = '${q}' and filter = '${filter}';`,
+        function(err, result){
+            callback(err, result);
+        });
+}
+
+//add search items
+function addSearchItems (q, items, existingStatusIds, callback) {
+    const connection = db.getConnection();
+    let updateQuery = '';
+    let insertQuery = '';
+    let details;
+    let id;
+    q = connection.escape(q);
+    for(let i = 0; i < items.length; i++){
+        id = items[i].id;
+        details = connection.escape(JSON.stringify(items[i]));
+        if(existingStatusIds.indexOf(id) !== -1){
+            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q};`;
+        } else {
+            insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query ) VALUES ('${id}', ${details}, ${q});`;
+        }
+    }
+    connection.query(updateQuery+insertQuery, callback);
 }

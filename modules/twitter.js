@@ -10,7 +10,7 @@ const TABLE_NAME_SEARCH = config.get('twitter:table_name_search');
 const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
                           , consumer_secret: config.get('twitter:consumer_secret')
                           , app_only_auth: true});
-const LIMIT = 4;
+const LIMIT = 50;
 
 exports.updateProfile = function (options, token, next) {
     options.access_token = token;

@@ -113,13 +113,13 @@ db.init(function(err, connection){
                 console.log('youtube updatePosts userId='+id);
             }
         });
-        /*youtube.search('summer', 10, 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, result){
+        youtube.search('summer', 10, 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, result){
             if(err){
                 console.log('youtube search err='+err);
             } else {
                 console.log('youtube search result='+JSON.stringify(result));
             }
-        });*/
+        });
 
         /*spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQAUOwdRe0zW-sWqUJqHOwVU9HWA0aHQT7YcHyOWbw2J6VwCpVzLmOdUS43kQnYxYcDq5WQX7Fjt3VdHjfk5uTpclYs9bY2vh3xqn7m4l8zf15z4fVchrNcBcEs0rAJIkY3pEdMTW3rzz4FCkUBrnPFzbh63aUR5xSINWeKFhA7oGbjCUktquVufxaGFCjsvTA8k1OQ8F9WuIgl3-szn03b46oQAJQ8gvM5nxIaULlFOf9C1NKR625yw75Tw9nS6xt483KG2K3gNfT0nu6W7Sdd1gHqLXCFkjn0sYClkrUEy7E5NPBEV2lGr8EBMkx0-RUS7QAfdqSABGCzb8ukr0Q', function(err, id){
             if(err){

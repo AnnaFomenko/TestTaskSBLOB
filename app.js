@@ -55,20 +55,20 @@ db.init(function(err, connection){
     } else {
         //test
 
-        //facebook.updateProfile('berniesanders','EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD',  function(err, id){
-            //if(err){
-               //console.log('facebook updateProfile err='+err);
-            //} else {
-                //console.log('facebook updateProfile userId='+id);
-            //}
-        //});
-        //facebook.updatePosts('901526266540071', 'EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD', false, function(err, id){
-            //if(err){
-                //console.log('facebook updatePosts err='+err);
-           // } else {
-               // console.log('facebook updatePosts userId='+id);
-            //}
-        //});
+        /*facebook.updateProfile('berniesanders','EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD',  function(err, id){
+            if(err){
+               console.log('facebook updateProfile err='+err);
+            } else {
+                console.log('facebook updateProfile userId='+id);
+            }
+        });
+        facebook.updatePosts('901526266540071', 'EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD', false, function(err, id){
+            if(err){
+               console.log('facebook updatePosts err='+err);
+            } else {
+                console.log('facebook updatePosts userId='+id);
+            }
+        });
 
         facebook.search('hot summer', 'page', 5, 'EAACEdEose0cBAGWGJ3rH5QydZAI4weCHAJxTNkWYvZBx0MVoK9BZBZBhe23gF600hSQl5KDTfskBb23IOkTuqQJokHjM3HUUw7RUd7YNXP5XzcZB1sdGm3jCE6pIurRcRCi4aZAi02MZBjkbWFu0Wrb6ghR1b6e0L28cxKJ8KFdZAbwgLAkz2i2FSJl6oYDCE94ZD', function(err, result){
             if(err){
@@ -92,7 +92,7 @@ db.init(function(err, connection){
                 console.log('twitter updatePosts user='+id);
             }
         });
-        twitter.search('twitter', 2, 'VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(err, result){
+        twitter.search('twitter', 20, 'VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', function(err, result){
              if(err){
                 console.log('twitter search err='+err);
              } else {
@@ -121,27 +121,27 @@ db.init(function(err, connection){
             }
         });
 
-        /*spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQAUOwdRe0zW-sWqUJqHOwVU9HWA0aHQT7YcHyOWbw2J6VwCpVzLmOdUS43kQnYxYcDq5WQX7Fjt3VdHjfk5uTpclYs9bY2vh3xqn7m4l8zf15z4fVchrNcBcEs0rAJIkY3pEdMTW3rzz4FCkUBrnPFzbh63aUR5xSINWeKFhA7oGbjCUktquVufxaGFCjsvTA8k1OQ8F9WuIgl3-szn03b46oQAJQ8gvM5nxIaULlFOf9C1NKR625yw75Tw9nS6xt483KG2K3gNfT0nu6W7Sdd1gHqLXCFkjn0sYClkrUEy7E5NPBEV2lGr8EBMkx0-RUS7QAfdqSABGCzb8ukr0Q', function(err, id){
+        spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBbLsvfwpL65vtxdWKLFQ4QHJi-mVXc_Vwra8WjHupQiaSIpkFdw0Ckrsv1t6V56g0kernRZKuEwy89KyF5_Ds6wch1LQHwBR3C4IwDvDJD2WqMlKZFrXPiTT06wpujxJBguJ14xX6SKQKAH0Ye7lM1P9hvoKVqOnzZWZgy6hzPU8X6q1Xy3p37B-XUoaC9LATon39N2meoAdgPoZCrI4erPBpHqDJRtwwIzepMrKkXxcjWvEU2-p45tL1DEoTx030C5NNHKZnMq5T0iUBDEDQBBrpyyVIq9GkusknjXrV52WF-agt0D8XCB1HicdF668x1qZ3R_tVRRZKMY6MREQ', function(err, id){
             if(err){
                 console.log('spotify updateProfile err ='+err);
             } else {
                 console.log('spotify updateProfile userId='+id);
             }
-        });
-        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQAUOwdRe0zW-sWqUJqHOwVU9HWA0aHQT7YcHyOWbw2J6VwCpVzLmOdUS43kQnYxYcDq5WQX7Fjt3VdHjfk5uTpclYs9bY2vh3xqn7m4l8zf15z4fVchrNcBcEs0rAJIkY3pEdMTW3rzz4FCkUBrnPFzbh63aUR5xSINWeKFhA7oGbjCUktquVufxaGFCjsvTA8k1OQ8F9WuIgl3-szn03b46oQAJQ8gvM5nxIaULlFOf9C1NKR625yw75Tw9nS6xt483KG2K3gNfT0nu6W7Sdd1gHqLXCFkjn0sYClkrUEy7E5NPBEV2lGr8EBMkx0-RUS7QAfdqSABGCzb8ukr0Q', false, function(err, id){
+        });*/
+        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQBbLsvfwpL65vtxdWKLFQ4QHJi-mVXc_Vwra8WjHupQiaSIpkFdw0Ckrsv1t6V56g0kernRZKuEwy89KyF5_Ds6wch1LQHwBR3C4IwDvDJD2WqMlKZFrXPiTT06wpujxJBguJ14xX6SKQKAH0Ye7lM1P9hvoKVqOnzZWZgy6hzPU8X6q1Xy3p37B-XUoaC9LATon39N2meoAdgPoZCrI4erPBpHqDJRtwwIzepMrKkXxcjWvEU2-p45tL1DEoTx030C5NNHKZnMq5T0iUBDEDQBBrpyyVIq9GkusknjXrV52WF-agt0D8XCB1HicdF668x1qZ3R_tVRRZKMY6MREQ', false, function(err, id){
             if(err){
                 console.log('spotify updatePosts err ='+err);
             } else {
                 console.log('spotify updatePosts userId='+id);
             }
-        })*/
-        spotify.search('lalalala', 10, 'BQAUOwdRe0zW-sWqUJqHOwVU9HWA0aHQT7YcHyOWbw2J6VwCpVzLmOdUS43kQnYxYcDq5WQX7Fjt3VdHjfk5uTpclYs9bY2vh3xqn7m4l8zf15z4fVchrNcBcEs0rAJIkY3pEdMTW3rzz4FCkUBrnPFzbh63aUR5xSINWeKFhA7oGbjCUktquVufxaGFCjsvTA8k1OQ8F9WuIgl3-szn03b46oQAJQ8gvM5nxIaULlFOf9C1NKR625yw75Tw9nS6xt483KG2K3gNfT0nu6W7Sdd1gHqLXCFkjn0sYClkrUEy7E5NPBEV2lGr8EBMkx0-RUS7QAfdqSABGCzb8ukr0Q', function(err, result){
+        });
+        /*spotify.search('lalalala', 1, 'BQBbLsvfwpL65vtxdWKLFQ4QHJi-mVXc_Vwra8WjHupQiaSIpkFdw0Ckrsv1t6V56g0kernRZKuEwy89KyF5_Ds6wch1LQHwBR3C4IwDvDJD2WqMlKZFrXPiTT06wpujxJBguJ14xX6SKQKAH0Ye7lM1P9hvoKVqOnzZWZgy6hzPU8X6q1Xy3p37B-XUoaC9LATon39N2meoAdgPoZCrI4erPBpHqDJRtwwIzepMrKkXxcjWvEU2-p45tL1DEoTx030C5NNHKZnMq5T0iUBDEDQBBrpyyVIq9GkusknjXrV52WF-agt0D8XCB1HicdF668x1qZ3R_tVRRZKMY6MREQ', function(err, result){
             if(err){
                 console.log('spotify search err ='+err);
             } else {
                 console.log('spotify search result='+JSON.stringify(result));
             }
-        })
+        })*/
 
     }
 });

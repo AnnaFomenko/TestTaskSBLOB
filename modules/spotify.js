@@ -21,7 +21,7 @@ exports.search = function (q, page, token, next) {
 };
 
 function profile (id, token, next) {
-    request(`${config.get('spotify:api_url')}artists/${id}?access_token=${token}' + ` , function(err, result){
+    request(`${config.get('spotify:api_url')}artists/${id}?access_token=${token}` , function(err, result){
         let body = null;
         if( result.body ){
             try{
@@ -42,7 +42,7 @@ function profile (id, token, next) {
         }
         addOrUpdateData(id, body, next);
     });
-};
+}
 
 //add or update existing user profile
 function addOrUpdateData (id, details, next) {
@@ -52,9 +52,9 @@ function addOrUpdateData (id, details, next) {
         if(err){
             next(err)
         } else {
-            details = JSON.stringify(details);
+            details = connection.escape(JSON.stringify(details));
             if(result && result.length > 0){
-                connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, updated = NOW() where id = ?;`,[details, id]
+                connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ? where id = ?;`,[details, id]
                     , function(err){
                         if(err){
                             return next(err.message);
@@ -174,14 +174,12 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
     let id;
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
-        details = JSON.stringify(posts[i]);
-        details = details.replace(/'/g, '`');
-        //TODO write util functions
-        textcontent = (posts[i].name) ? encodeURIComponent(posts[i].name.replace(/[':()/!|\/]/iug, "")) : '';
+        details = connection.escape(JSON.stringify(posts[i]));
+        textcontent = connection.escape(posts[i].name);
         if(existingPostIds.indexOf(posts[i].id) !== -1){
-            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = '${user_id}', updated = NOW() where id = '${id}';`;
+            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent}, user_id = '${user_id}' where id = '${id}';`;
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', '${details}', '${textcontent}', '${user_id}');`;
+            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', ${details}, ${textcontent}, '${user_id}');`;
         }
     }
     connection.query(updateQuery+insertQuery, callback);
@@ -198,7 +196,7 @@ function checkExistingPosts(postIds, callback){
 //search
 function search (q, page, token, next) {
     let offset = page*LIMIT;
-    request(`${config.get('spotify:api_url')}search?q=${q}&access_token=${token}&limit=${LIMIT}&offset=${offset}&type=track,artist,album,playlist` , function(err, result){
+    request(`${config.get('spotify:api_url')}search?q=${q}&access_token=${token}&limit=${LIMIT}&offset=${offset}&type=track,artist` , function(err, result){
         let body = null;
         if( result.body ){
             try{
@@ -216,12 +214,27 @@ function search (q, page, token, next) {
         }
         next(null, body);
         let itemsIds = [];
-        for(let i = result.data.length-1; i >= 0 ; i--){
-            if(itemsIds.indexOf(result.data[i].id) !== -1){
-                result.data.splice(i, 1);
-                continue;
+        let foundTracks = false;
+        let foundArtists = false;
+        if(result.artists && result.artists.items && result.artists.items.length>0) {
+            foundArtists = true;
+            for (let i = result.artists.items.length - 1; i >= 0; i--) {
+                if (itemsIds.indexOf(result.artists.items[i].id) !== -1) {
+                    result.artists.items.splice(i, 1);
+                    continue;
+                }
+                itemsIds.push(result.artists.items[i].id);
             }
-            itemsIds.push(result.data[i].id);
+        }
+        if(result.tracks && result.tracks.items && result.tracks.items.length>0) {
+            foundTracks = true;
+            for (let i = result.tracks.items.length - 1; i >= 0; i--) {
+                if (itemsIds.indexOf(result.tracks.items[i].id) !== -1) {
+                    result.tracks.items.splice(i, 1);
+                    continue;
+                }
+                itemsIds.push(result.tracks.items[i].id);
+            }
         }
         if(itemsIds.length>0){
             checkExistingItems(q, itemsIds, function(err, results){
@@ -233,11 +246,21 @@ function search (q, page, token, next) {
                         existingItemsIds.push(results[i].item_id);
                     }
                 }
-                addSearchItems (q, result.data, existingItemsIds, function(err){
-                    if(err){
-                        console.error(err);
-                    }
-                })
+                let items = [];
+                if(foundArtists){
+                    addSearchItems (q, result.artists.items, existingItemsIds, function(err){
+                        if(err){
+                            console.error(err);
+                        }
+                    })
+                }
+                if(foundTracks){
+                    addSearchItems (q, result.tracks.items, existingItemsIds, function(err){
+                        if(err){
+                            console.error(err);
+                        }
+                    })
+                }
             });
         }
     });
@@ -261,6 +284,7 @@ function addSearchItems (q, items, existingStatusIds, callback) {
     q = connection.escape(q);
     for(let i = 0; i < items.length; i++){
         id = items[i].id;
+        console.log(items[i].id)
         details = connection.escape(JSON.stringify(items[i]));
         if(existingStatusIds.indexOf(id) !== -1){
             updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q};`;

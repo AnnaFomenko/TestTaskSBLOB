@@ -34,7 +34,8 @@ exports.init = function (callback) {
         createYoutubeSearchTableQuery,
         createSpotifySearchTableQuery
     ];
-    const migrations = [`ALTER TABLE ${config.get('facebook:table_name_profile')} MODIFY id BIGINT UNSIGNED;`, `ALTER TABLE ${config.get('youtube:table_name_profile')} MODIFY id VARCHAR(155);`];
+    const migrations = [`ALTER TABLE ${config.get('facebook:table_name_profile')} MODIFY id BIGINT UNSIGNED;`, `ALTER TABLE ${config.get('youtube:table_name_profile')} MODIFY id VARCHAR(155);`, `ALTER TABLE ${config.get('youtube:table_name_post')} MODIFY id VARCHAR(155);`, `ALTER TABLE ${config.get('youtube:table_name_post')} MODIFY user_id VARCHAR(155);`];
+    migrations.push(`ALTER TABLE ${config.get('spotify:table_name_post')} MODIFY user_id VARCHAR(155);`);
     migrations.push(`ALTER DATABASE ${config.get('mysql:db')} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;`);
     migrations.push(`ALTER TABLE ${config.get('facebook:table_name_post')} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
     migrations.push(`ALTER TABLE ${config.get('twitter:table_name_post')} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
@@ -88,7 +89,7 @@ function dataBaseConnect(callback) {
             callback();
         }
     });
-
+console.log(connection.escape('1VnKQDQzS1nR9ixXUa9hN5'))
     connection.on('error', function (err) {
         if (err.code === 'PROTOCOL_CONNECTION_LOST') {
             dataBaseConnect();

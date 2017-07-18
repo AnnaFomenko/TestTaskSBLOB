@@ -225,13 +225,12 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
     const connection = db.getConnection();
     let updateQuery = '';
     let insertQuery = '';
-    let details;
+    let details = '';
     let textcontent='';
     let id;
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
         details = connection.escape(JSON.stringify(posts[i]));
-        //TODO write util functions
         textcontent = connection.escape(posts[i].title);
         if(existingPostIds.indexOf(posts[i].id) !== -1){
             updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent}, user_id = '${user_id}' where id = '${id}';`;

@@ -9,7 +9,8 @@ const TABLE_NAME_POST = config.get('twitter:table_name_post');
 const TABLE_NAME_SEARCH = config.get('twitter:table_name_search');
 const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
                           , consumer_secret: config.get('twitter:consumer_secret')
-                          , app_only_auth: true});
+                          , access_token: '884356029798023173-VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf'
+                          , access_token_secret: 'XdeSQgs1UwBjy2bGgUftR4xBewhqnhfUOKD31lJA1ePci'});
 const LIMIT = 50;
 
 exports.updateProfile = function (options, token, next) {
@@ -203,8 +204,8 @@ function checkExistingPosts(postIds, callback){
 
 //search
 function search (q, page, token, next) {
-    let existingStatusIds = [];
-    twitter.get('search/tweets', {access_token: token, q: q, count: LIMIT, result_type:'mixed', include_entities:0}, function(err, result) {
+    let existingItemsIds = [];
+    twitter.get('users/search', { q: q, count: LIMIT, page: page }, function(err, result) {
         if(err){
             return next(err.message);
         }
@@ -212,25 +213,25 @@ function search (q, page, token, next) {
             return next(errors.emptyResult);
         }
         next(null, result);
-        let statusIds = [];
-        for(let i = result.statuses.length-1; i >= 0 ; i--){
-            if(statusIds.indexOf(result.statuses[i].id_str) !== -1){
-                result.statuses.splice(i, 1);
+        let itemsIds = [];
+        for(let i = result.length-1; i >= 0 ; i--){
+            if(itemsIds.indexOf(result[i].id_str) !== -1){
+                result.splice(i, 1);
                 continue;
             }
-            statusIds.push(result.statuses[i].id_str);
+            itemsIds.push(result[i].id_str);
         }
-        if(statusIds.length>0){
-            checkExistingItems(q, statusIds, function(err, results){
+        if(itemsIds.length>0){
+            checkExistingItems(q, itemsIds, function(err, results){
                 if(err){
                     return console.error(err);
                 }
                 if(results && results.length>0) {
                     for (let i = 0; i < results.length; i++) {
-                        existingStatusIds.push(results[i].item_id);
+                        existingItemsIds.push(results[i].item_id);
                     }
                 }
-                addSearchItems (q, result.statuses, existingStatusIds, function(err){
+                addSearchItems (q, result, existingItemsIds, function(err){
                     if(err){
                         console.error(err);
                     }

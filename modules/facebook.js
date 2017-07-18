@@ -193,13 +193,12 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
     let id;
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
-        details = JSON.stringify(posts[i]);
-        details = details.replace(/'/g, '`');
-        textcontent = (posts[i].message) ? encodeURIComponent(posts[i].message.replace(/[':()/!|\/]/iug, "")) : '_';
+        details = connection.escape(JSON.stringify(posts[i]));
+        textcontent = connection.escape(posts[i].message);
         if(existingPostIds.indexOf(posts[i].id) !== -1){
-            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = '${details}', textcontent = '${textcontent}', user_id = ${user_id}, updated = NOW() where id = '${id}';`;
+            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent}, user_id = ${user_id} where id = '${id}';`;
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', '${details}', '${textcontent}', ${user_id});`;
+            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', ${details}, ${textcontent}, ${user_id});`;
         }
     }
     connection.query(updateQuery+insertQuery, callback);
@@ -211,7 +210,7 @@ function checkExistingPosts(postIds, callback){
         function(err, result){
             callback(err, result);
         });
-};
+}
 
 //search
 function search (q, filter, page, token, next) {

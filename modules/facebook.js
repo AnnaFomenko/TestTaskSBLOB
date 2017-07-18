@@ -8,7 +8,21 @@ const PAGE = 'page';
 const TABLE_NAME_PROFILE = config.get('facebook:table_name_profile');
 const TABLE_NAME_POST = config.get('facebook:table_name_post');
 const TABLE_NAME_SEARCH = config.get('facebook:table_name_search');
-const LIMIT = 50;
+const POSTS_LIMIT = 50;
+
+//search
+const MAX_SEARCH_LIMIT = 100;
+const FILTER_PAGE = 'page';
+const FILTER_USER = 'user';
+const FILTER_GROUP = 'group';
+
+exports.searchFilter = {
+    PAGE: FILTER_PAGE,
+    USER: FILTER_USER,
+    GROUP: FILTER_GROUP
+};
+
+//inits
 graph.setVersion('2.9');
 
 exports.updateProfile = function ( user_id, token, next) {
@@ -20,20 +34,19 @@ exports.updatePosts = function ( user_id, token, all, next) {
     posts(user_id, all, nextUrl, next);
 };
 
-// filter - page or user
-exports.search = function (q, filter, page, token, next) {
-    search(q, filter, page, token, next);
+exports.search = function (q, filter, page, itemsPerPage, token, next) {
+    search(q, filter, page, itemsPerPage, token, next);
 };
 
 //profile
 function profile (id, token, next) {
     graph.get(id+'?fields=id,about,cover,currency,devices,birthday,link,locale,picture,meeting_for,middle_name,accounts,session_keys,groups,likes,videos,website,family,work,name_format,political,public_key,photos,favorite_teams,favorite_athletes,last_name,email,first_name,name,gender,is_verified,location,interested_in,hometown,quotes,relationship_status,religion,security_settings,significant_other,sports,timezone,updated_time,verified,languages'
-    , { access_token: token}, function(err, result) {
+    , {access_token: token}, function(err, result) {
             if (err) {
-                if(err.code === 100){
+                if(err.code === 100 || err.code === 110){
                     return page(id, token, next);
                 }
-                return next(err.message);
+                return next(err);
             }
             if(!result){
                 return next(errors.emptyResult);
@@ -49,14 +62,14 @@ function page (id, token, next) {
             if(err.code === 100){
                 return deleteData (id, next);
             }
-            return next(err.message);
+            return next(err);
         }
         if(!result){
             return next(errors.emptyResult);
         }
         addOrUpdateData( id, result, next, PAGE);
     });
-};
+}
 
 //add or update existing user profile or page
 function addOrUpdateData (id, details, next, type) {
@@ -65,14 +78,14 @@ function addOrUpdateData (id, details, next, type) {
     id = details.id;
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE}  WHERE id = ?`, id, function(err, result){
         if(err){
-            return next(err.message)
+            return next(err)
         }
         details = JSON.stringify(details);
         if(result && result.length > 0){
-            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, updated = NOW() where id = ?;`,[details, id]
+            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ? where id = ?;`,[details, id]
                 , function(err){
                     if(err){
-                        return next(err.message);
+                        return next(err);
                     }
                     next(null, id);
             });
@@ -80,7 +93,7 @@ function addOrUpdateData (id, details, next, type) {
             connection.query(`INSERT INTO ${TABLE_NAME_PROFILE} ( id, type, name, detail_json ) VALUES (?, ?, ?, ?);`, [ id, type, name, details]
                 , function(err){
                      if(err){
-                         return next(err.message);
+                         return next(err);
                      }
                      next(null, id);
                 });
@@ -93,13 +106,13 @@ function deleteData (id, next) {
     const connection = db.getConnection();
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE} WHERE id = ?`, id, function(err, result){
         if(err){
-            return next(err.message);
+            return next(err);
         }
         if(result && result.length > 0) {
             connection.query(`DELETE from ${TABLE_NAME_PROFILE} WHERE id = ?`, id
                 , function (err) {
                     if(err) {
-                        return next(err.message);
+                        return next(err);
                     }
                     next(errors.profileNotExist);
                 });
@@ -116,7 +129,7 @@ function posts (user_id, all, nextUrl, next) {
     let existingPostIds = [];
     getNextPosts(nextUrl, function(err, result){
         if (err) {
-            return next(err.message);
+            return next(err);
         }
         if(!result || !result.data) {
             return next(errors.emptyResult);
@@ -148,7 +161,7 @@ function posts (user_id, all, nextUrl, next) {
             addOrUpdatePosts( user_id, data, existingPostIds
                 , function(err){
                     if(err){
-                        return next(err.message);
+                        return next(err);
                     }
                     if( all || existingPostIds.length < data.length){
                         if(nextUrl) {
@@ -213,13 +226,19 @@ function checkExistingPosts(postIds, callback){
 }
 
 //search
-function search (q, filter, page, token, next) {
+function search (q, filter, page, itemsPerPage, token, next) {
+    if(itemsPerPage > MAX_SEARCH_LIMIT || itemsPerPage <= 0){
+        return next(errors.itemsPerPage);
+    }
+    if(filter !== FILTER_USER && filter !== FILTER_GROUP && filter !== FILTER_PAGE){
+        return next(errors.invalidSearchFilter);
+    }
     let existingItemsIds = [];
-    let offset = page*LIMIT;
+    let offset = page*itemsPerPage;
     graph.get('search'
-        , { access_token: token, type: filter, limit:LIMIT, q: q, offset: offset}, function(err, result) {
+        , { access_token: token, type: filter, limit:itemsPerPage, q: q, offset: offset}, function(err, result) {
             if (err) {
-                return next(err.message);
+                return next(err);
             }
             if(!result){
                 return next(errors.emptyResult);
@@ -245,6 +264,7 @@ function search (q, filter, page, token, next) {
                     }
                     addSearchItems (q, filter, result.data, existingItemsIds, function(err){
                         if(err){
+                            //TODO use logger
                             console.error(err);
                         }
                     })
@@ -255,7 +275,7 @@ function search (q, filter, page, token, next) {
 
 function checkExistingItems(q, filter, itemsIds, callback){
     const connection = db.getConnection();
-    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = '${q}' and filter = '${filter}';`,
+    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = ? and filter = ?;`, [q, filter],
         function(err, result){
             callback(err, result);
         });
@@ -274,7 +294,7 @@ function addSearchItems (q, filter, items, existingStatusIds, callback) {
         id = items[i].id;
         details = connection.escape(JSON.stringify(items[i]));
         if(existingStatusIds.indexOf(id) !== -1){
-            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q};`;
+            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q} and filter = ${filter};`;
         } else {
             insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query, filter ) VALUES ('${id}', ${details}, ${q}, ${filter});`;
         }

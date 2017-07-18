@@ -9,9 +9,17 @@ const TABLE_NAME_POST = config.get('twitter:table_name_post');
 const TABLE_NAME_SEARCH = config.get('twitter:table_name_search');
 const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
                           , consumer_secret: config.get('twitter:consumer_secret')
-                          , access_token: '884356029798023173-VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf'
-                          , access_token_secret: 'XdeSQgs1UwBjy2bGgUftR4xBewhqnhfUOKD31lJA1ePci'});
-const LIMIT = 50;
+                          , app_only_auth: true});
+const POSTS_LIMIT = 50;
+//search
+const MAX_SEARCH_LIMIT = 50;
+const FILTER_USER = 'user';
+const FILTER_TWEET = 'tweet';
+
+exports.searchFilter = {
+    TWEET: FILTER_TWEET,
+    USER: FILTER_USER
+};
 
 exports.updateProfile = function (options, token, next) {
     options.access_token = token;
@@ -24,9 +32,21 @@ exports.updatePosts = function (user_id, token, all, next) {
 };
 
 
-exports.search = function (q, page, token, next) {
-    search(q, page, token, next);
+exports.search = function (q, filter, page, itemsPerPage, tokens, next, secretToken) {
+    let userAuthTwitter = null;
+    if(filter === FILTER_USER){
+        if(tokens instanceof Object && tokens.token && tokens.token_secret){
+            userAuthTwitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
+                , consumer_secret: config.get('twitter:consumer_secret')
+                , access_token: tokens.token
+                , access_token_secret: tokens.token_secret});
+        } else {
+            next(errors.invalidToken)
+        }
+    }
+    search(q, filter, page, itemsPerPage, next, userAuthTwitter);
 };
+
 
 
 //profile
@@ -36,7 +56,7 @@ function profile (options, next) {
             if(err.code === 50){
                 return deleteData (options, next);
             }
-            return next(err.message);
+            return next(err);
         }
         if(!result){
             return next(errors.emptyResult);
@@ -59,14 +79,14 @@ function addOrUpdateData ( options, details, next ) {
     const connection = db.getConnection();
     connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE}  WHERE id_str = ?`, id_str, function(err, result){
         if(err){
-            return next(err.message);
+            return next(err);
         }
         details = JSON.stringify(details);
         if(result && result.length > 0){
-            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, lastGetPosts = ?, updated = NOW() where id_str = ?;`,[details, lastGetPosts, id_str]
+            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, lastGetPosts = ? where id_str = ?;`,[details, lastGetPosts, id_str]
                 , function(err){
                       if(err){
-                          return next(err.message);
+                          return next(err);
                       }
                      next(null, options);
                 });
@@ -74,7 +94,7 @@ function addOrUpdateData ( options, details, next ) {
             connection.query(`INSERT INTO ${TABLE_NAME_PROFILE} ( id_str, id, name, screen_name, detail_json, lastGetPosts ) VALUES (?, ?, ?, ?, ?, ?);`, [ id_str, id, name, screen_name, details, lastGetPosts]
                 , function(err){
                 if(err){
-                    return next(err.message);
+                    return next(err);
                 }
                 next(null, options);
             });
@@ -89,12 +109,12 @@ function deleteData (options, next) {
     const connection = db.getConnection();
     connection.query(`SELECT id_str from ${TABLE_NAME_PROFILE} WHERE ${paramName} = ?`, param, function(err, result){
         if(err){
-            return next(err.message);
+            return next(err);
         }
         if(result && result.length > 0){
             connection.query(`DELETE from ${TABLE_NAME_PROFILE} WHERE ${paramName} = ?`,  param, function (err) {
                 if(err) {
-                    return next(err.message);
+                    return next(err);
                 }
                 next(errors.profileNotExist);
             });
@@ -106,12 +126,11 @@ function deleteData (options, next) {
 
 //posts
 function posts (user_id, token, all, max_id, next) {
-    console.log('twitter posts max_id='+max_id);
     let postIds = [];
     let existingPostIds = [];
     getNextPosts(user_id, token, max_id, function(err, result){
         if (err) {
-            return next(err.message);
+            return next(err);
         }
         if(!result) {
             return next(errors.emptyResult);
@@ -143,7 +162,7 @@ function posts (user_id, token, all, max_id, next) {
             addOrUpdatePosts( user_id, data, existingPostIds
                 , function(err, result){
                     if(err){
-                        return next(err.message);
+                        return next(err);
                     }
                     if( all || existingPostIds.length < data.length){
                         if(max_id > 0) {
@@ -163,7 +182,7 @@ function posts (user_id, token, all, max_id, next) {
 function getNextPosts(user_id, token, max_id, callback){
     let params = { user_id: user_id };
     params.include_rts = 1;
-    params.count = LIMIT;
+    params.count = POSTS_LIMIT;
     params.access_token = token;
     if(max_id > 0){
         params.max_id = max_id;
@@ -203,11 +222,109 @@ function checkExistingPosts(postIds, callback){
 }
 
 //search
-function search (q, page, token, next) {
-    let existingItemsIds = [];
-    twitter.get('users/search', { q: q, count: LIMIT, page: page }, function(err, result) {
+function search (q, filter, page, itemsPerPage, next, userAuthTwitter) {
+    if(itemsPerPage > MAX_SEARCH_LIMIT || itemsPerPage <= 0){
+        return next(errors.itemsPerPage);
+    }
+    switch(filter){
+        case FILTER_USER:
+            searchByUsers(q, page, itemsPerPage, next, userAuthTwitter);
+            break;
+        case FILTER_TWEET:
+            let itemsCount = 0;
+            let commonResult = [];
+            let searchResults = [];
+            searchByTweets(q, page, itemsPerPage, next, null, itemsCount, commonResult, searchResults);
+            break;
+        default:
+            next(errors.invalidSearchFilter);
+   }
+}
+
+function searchByTweets (q, page, itemsPerPage, next, nextResult, itemsCount, commonResult, searchResults) {
+    getOnePage(q, nextResult, function(err, result, nextResult){
         if(err){
-            return next(err.message);
+            return next(err);
+        }
+        itemsCount += MAX_SEARCH_LIMIT;
+        if(result && result.statuses){
+            commonResult = [].concat(...commonResult).concat(...result.statuses);
+        }
+        let count = (page + 1)*itemsPerPage;
+        let startIndex = 0;
+        let endIndex = 0;
+        if(itemsCount >= count){
+            startIndex = page*itemsPerPage;
+            endIndex = count;
+            if(commonResult.length < startIndex){
+                searchResults = commonResult;
+            } else if(commonResult.length < endIndex){
+                searchResults = commonResult.slice(startIndex, commonResult.length);
+            } else if(commonResult.length > endIndex){
+                searchResults = commonResult.slice(startIndex, endIndex);
+            }
+            next(null, searchResults);
+        } else if(nextResult) {
+            searchByTweets (q, page, itemsPerPage, next, nextResult, itemsCount, commonResult, searchResults);
+        } else {
+            if(commonResult.length/itemsPerPage > page){
+                startIndex = itemsPerPage*page + commonResult.length%itemsPerPage;
+                searchResults = commonResult.slice(startIndex, commonResult.length);
+            }
+            next(null, searchResults);
+        }
+    });
+}
+
+function getOnePage (q, nextResult, callback) {
+    let existingStatusIds = [];
+    let params = {q: q, count: MAX_SEARCH_LIMIT, result_type:'mixed', include_entities:0};
+    if(nextResult){
+        nextResult = utils.parseQuery(nextResult);
+        params.max_id = nextResult.max_id;
+    }
+    twitter.get('search/tweets', params, function(err, result) {
+        if(err){
+            return callback(err);
+        }
+        if(!result){
+            return callback(errors.emptyResult);
+        }
+        nextResult = (result.search_metadata && result.search_metadata.next_results) ? result.search_metadata.next_results : null;
+        let statusIds = [];
+        for(let i = result.statuses.length-1; i >= 0 ; i--){
+            if(statusIds.indexOf(result.statuses[i].id_str) !== -1){
+                result.statuses.splice(i, 1);
+                continue;
+            }
+            statusIds.push(result.statuses[i].id_str);
+        }
+        callback(null, result, nextResult);
+        if(statusIds.length>0){
+            checkExistingItems(q, FILTER_TWEET, statusIds, function(err, results){
+                if(err){
+                    return console.error(err);
+                }
+                if(results && results.length>0) {
+                    for (let i = 0; i < results.length; i++) {
+                        existingStatusIds.push(results[i].item_id);
+                    }
+                }
+                addSearchItems (q, FILTER_TWEET , result.statuses, existingStatusIds, function(err){
+                    if(err){
+                        console.error(err);
+                    }
+                })
+            });
+        }
+    });
+}
+
+function searchByUsers (q, page, itemsPerPage, next, userAuthTwitter) {
+    let existingItemsIds = [];
+    userAuthTwitter.get('users/search', { q: q, count: itemsPerPage, page: page }, function(err, result) {
+        if(err){
+            return next(err);
         }
         if(!result){
             return next(errors.emptyResult);
@@ -222,7 +339,7 @@ function search (q, page, token, next) {
             itemsIds.push(result[i].id_str);
         }
         if(itemsIds.length>0){
-            checkExistingItems(q, itemsIds, function(err, results){
+            checkExistingItems(q, FILTER_USER, itemsIds, function(err, results){
                 if(err){
                     return console.error(err);
                 }
@@ -231,7 +348,7 @@ function search (q, page, token, next) {
                         existingItemsIds.push(results[i].item_id);
                     }
                 }
-                addSearchItems (q, result, existingItemsIds, function(err){
+                addSearchItems (q, FILTER_USER, result, existingItemsIds, function(err){
                     if(err){
                         console.error(err);
                     }
@@ -241,29 +358,30 @@ function search (q, page, token, next) {
     });
 }
 
-function checkExistingItems(q, statusIds, callback){
+function checkExistingItems(q, filter, itemsIds, callback){
     const connection = db.getConnection();
-    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ statusIds.join('\',\'')+'\''}) and query = '${q}';`,
+    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = ? and filter = ?;`, [q, filter],
         function(err, result){
             callback(err, result);
         });
 }
 
 //add search items
-function addSearchItems (q, statuses, existingStatusIds, callback) {
+function addSearchItems (q, filter,  statuses, existingStatusIds, callback) {
     const connection = db.getConnection();
     let updateQuery = '';
     let insertQuery = '';
     let details;
     let id;
     q = connection.escape(q);
+    filter = connection.escape(filter);
     for(let i = 0; i < statuses.length; i++){
         id = statuses[i].id_str;
         details = connection.escape(JSON.stringify(statuses[i]));
         if(existingStatusIds.indexOf(id) !== -1){
-            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q};`;
+            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q} and filter = ${filter};`;
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query ) VALUES ('${id}', ${details}, ${q});`;
+            insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query, filter ) VALUES ('${id}', ${details}, ${q}, ${filter});`;
         }
     }
     connection.query(updateQuery+insertQuery, callback);

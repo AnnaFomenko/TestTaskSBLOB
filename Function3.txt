@@ -1,0 +1,40 @@
+--------------------------------------
+Search spec
+--------------------------------------
+
+Api points served:
+
+Facebook
+	graph.search
+	types: user, page and group separately
+	not sure what the max limit per search is, but please use the max amount
+
+
+Twitter
+	users/search - count 20
+	search/tweets - count 100
+
+Spotify
+	 https://api.spotify.com/v1/search
+	 types: artist, playlist, and track. (each separate function)
+	 limit: 50
+
+ Youtube
+	https://www.googleapis.com/youtube/v3/search
+	limit: 50
+	types: channel, playlist, video (separated functions)
+
+
+Example
+
+network.search(authinfo, options&queryobject, desiredPage, resultsPerPage, callback);
+
+You always request the maximum amount o posts per page you can from the api.
+If the desired page is 2 and resultsPerPage is 10, then that means the results 11-20 are the ones you need.
+For example with twitter - users/search you can get 20 results per request. Now if resultsPerPage is 10 again but desiredPage is 3,
+the first api call returns 20 results. You save & update the users you get from them. 20 results equal 2 pages. We want page 3, so you do a second request in order to get page 3. (Wich is page 2 on twitters api, because the parameter says every 10 results are 1 page)
+
+If I search search/tweets it respons with 100 tweets at a time.If the resultsPerPage parameter is 20, those are 5 pages. So if I want page 4 with 20 results per page, you only need to make one api call and respond with 61-80. If I want page 6 you respond with 1-20 of the second request.
+
+Always save ALL the results you get.
+Keep in mind they will not always respond with full maximum amounts of posts. (Limit might be 50, but maybe only responds 5 because only 5 are found)

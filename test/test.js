@@ -108,5 +108,13 @@ describe('Facebook Module', function() {
                 done();
             });
         });
+        it("test invalid access_token", function(done) {
+            facebook.search('hot summer', facebook.searchFilter.PAGE, 10,  10,  'mock token',  function(err, result){
+                chai.expect(err).to.have.property('message');
+                chai.expect(err).to.have.property('code');
+                chai.expect(err.code).to.equal(190);
+                done();
+            });
+        });
     });
 });

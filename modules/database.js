@@ -58,7 +58,9 @@ exports.init = function (callback) {
                             console.error(err.message)
                         } else {
                             connection.query(migrations.join(""), function (err) {
-                                console.log(err);
+                                if(err) {
+                                    console.error('INIT DB ERROR = ' + err);
+                                }
                                 console.log('db is ready');
                             });
                         }
@@ -89,7 +91,6 @@ function dataBaseConnect(callback) {
             callback();
         }
     });
-console.log(connection.escape('1VnKQDQzS1nR9ixXUa9hN5'))
     connection.on('error', function (err) {
         if (err.code === 'PROTOCOL_CONNECTION_LOST') {
             dataBaseConnect();

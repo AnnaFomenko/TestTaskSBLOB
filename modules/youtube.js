@@ -158,7 +158,6 @@ function deleteData (id, next) {
 
 //posts
 function posts (user_id, token, all, nextPageToken, next) {
-    console.log('youtube posts nextUrl='+nextPageToken);
     //playlistId is always the userId.replace('UC', 'UU')
     let playlistId = user_id.replace('UC', 'UU');
     let postIds = [];
@@ -298,7 +297,6 @@ function recSearch (q, page, itemsPerPage, next, nextResult, itemsCount, commonR
             } else if(commonResult.length >= endIndex){
                 searchResults = commonResult.slice(startIndex, endIndex);
             }
-            console.log(commonResult.length, searchResults.length)
             next(null, searchResults);
         } else if(nextResult) {
             recSearch (q, page, itemsPerPage, next, nextResult, itemsCount, commonResult, searchResults, filter);
@@ -307,7 +305,6 @@ function recSearch (q, page, itemsPerPage, next, nextResult, itemsCount, commonR
                 startIndex = itemsPerPage*page + commonResult.length%itemsPerPage;
                 searchResults = commonResult.slice(startIndex, commonResult.length);
             }
-            console.log(commonResult.length, searchResults.length)
             next(null, searchResults);
         }
     });
@@ -315,11 +312,15 @@ function recSearch (q, page, itemsPerPage, next, nextResult, itemsCount, commonR
 
 function getOnePage (q, nextResult, filter, token, callback) {
     let existingItemsIds = [];
-    let pageToken = '';
+    let pageToken = null;
     if(nextResult){
         pageToken = nextResult;
     }
-    request(`${config.get("youtube:api_url")}search?part=snippet&q=${q}&key=${token}&maxResults=${MAX_SEARCH_LIMIT}&pageToken=${pageToken}&type=${filter}`, function(err, result){
+    let url = `${config.get("youtube:api_url")}search?part=snippet&q=${q}&key=${token}&maxResults=${MAX_SEARCH_LIMIT}&type=${filter}`;
+    if(pageToken){
+        url = `${url}&pageToken=${pageToken}`;
+    }
+    request(url, function(err, result){
         if(err){
             return callback(err);
         }

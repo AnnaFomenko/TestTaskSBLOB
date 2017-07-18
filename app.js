@@ -113,7 +113,7 @@ db.init(function(err, connection){
                 console.log('youtube updatePosts userId='+id);
             }
         });*/
-        youtube.search('winter', youtube.searchFilter.VIDEO, 5, 10, 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, result){
+        youtube.search('winter', youtube.searchFilter.VIDEO, 3, 10, 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, result){
             if(err){
                 console.log('youtube search err='+err.message);
             } else {

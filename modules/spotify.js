@@ -107,7 +107,6 @@ function deleteData (id, next) {
 
 //posts
 function posts (user_id, token,  all, nextUrl, next) {
-    console.log('spotify posts nextUrl='+nextUrl);
     let postIds = [];
     let existingPostIds = [];
     getNextPosts(nextUrl, function(err, result){

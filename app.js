@@ -1,20 +1,20 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var index = require('./routes')
-var db = require('./modules/database');
-var facebook = require('./modules/facebook');
-var twitter = require('./modules/twitter');
-var spotify = require('./modules/spotify');
-var youtube = require('./modules/youtube');
-var config = require("./config");
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const index = require('./routes');
+const db = require('./modules/database');
+const facebook = require('./modules/facebook');
+const twitter = require('./modules/twitter');
+const spotify = require('./modules/spotify');
+const youtube = require('./modules/youtube');
+const config = require("./config");
 
 
 
-var app = express();
+const app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

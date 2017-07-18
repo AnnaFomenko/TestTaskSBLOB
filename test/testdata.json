@@ -1,0 +1,21 @@
+{
+  "facebook": {
+    "token": "EAACEdEose0cBALA2KXysTZAEf7o012PL10aO2NtR38xZApG0aCCCBqmjAROf21e9QN36gOwWNExqLlJBQZCsPPXIl0uNzly3a7fKg3US8nCMNefznkET8ktY3FKuXYIZBaqSZCcrOSNNLVkVpz6ZBUGmSUQ72KyzxeNpspKsZCRGxS5ZB7W0gu3BIFL7B15dLzsZD",
+    "page": "berniesanders",
+    "user_id": "901526266540071"
+  },
+  "twitter": {
+    "token": "884356029798023173-VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf",
+    "secret_token": "XdeSQgs1UwBjy2bGgUftR4xBewhqnhfUOKD31lJA1ePci",
+    "screen_name": "AnnaFomenko4",
+    "user_id": "884356029798023173"
+  },
+  "spotify": {
+    "token": "BQATmHoAyuEuGNdu1sKx6q1Jy6mfrew5fBAFoGVCystujqDgGNdRIBD3kEuWRuDEifyEaSycJh2zgXfFUhnx0W9MrbhrQuwfB5b8744wveQZUD21_s5igZOt4Ix6LeKM28LZ2X9I8GtvB8EZJfw4dU16E_ZiHr8rugF5xnOUnxNyCoDoPTRnkkGkIwf3Fo3J0C41o6cQAouy1c9qnd97HPe1K1j31aznjLrAC0lv5U04gjs-igbgSH7sPqCeb7CRMBQiT8q8EsnvDFeLlgneUBnZqhQJdRZ-Ii4bcDYUlGo2LFlmbsWdSy18f65sky3s3i8KtvE-U5ZJFJS3o3Ilaw",
+    "user_id": "0TnOYISbd1XYRBk9myaseg"
+  },
+  "youtube": {
+    "token": "AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg",
+    "user_id": "UC_x5XG1OV2P6uZZ5FSM9Ttw"
+  }
+}

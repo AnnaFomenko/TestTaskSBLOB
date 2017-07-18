@@ -75,6 +75,7 @@ function page (id, token, next) {
 function addOrUpdateData (id, details, next, type) {
     const connection = db.getConnection();
     const name = details.name;
+    const user = id;
     id = details.id;
     connection.query(`SELECT id from ${TABLE_NAME_PROFILE}  WHERE id = ?`, id, function(err, result){
         if(err){
@@ -87,7 +88,7 @@ function addOrUpdateData (id, details, next, type) {
                     if(err){
                         return next(err);
                     }
-                    next(null, id);
+                    next(null, user);
             });
         } else {
             connection.query(`INSERT INTO ${TABLE_NAME_PROFILE} ( id, type, name, detail_json ) VALUES (?, ?, ?, ?);`, [ id, type, name, details]
@@ -95,7 +96,7 @@ function addOrUpdateData (id, details, next, type) {
                      if(err){
                          return next(err);
                      }
-                     next(null, id);
+                     next(null, user);
                 });
         }
     });

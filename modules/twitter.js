@@ -33,7 +33,7 @@ exports.updatePosts = function (user_id, token, all, next) {
 };
 
 
-exports.search = function (q, filter, page, itemsPerPage, tokens, next, secretToken) {
+exports.search = function (q, filter, page, itemsPerPage, tokens, next) {
     let userAuthTwitter = null;
     if(filter === FILTER_USER){
         if(tokens instanceof Object && tokens.token && tokens.token_secret){
@@ -42,7 +42,7 @@ exports.search = function (q, filter, page, itemsPerPage, tokens, next, secretTo
                 , access_token: tokens.token
                 , access_token_secret: tokens.token_secret});
         } else {
-            next(errors.invalidToken)
+            return next(errors.invalidToken)
         }
     }
     search(q, filter, page, itemsPerPage, next, userAuthTwitter);

@@ -390,7 +390,7 @@ function checkExistingItems( filter, itemsIds, callback){
     if(filter !== FILTER_CHANNEL){
         checkExistingPosts(itemsIds, callback);
     } else {
-        connection.query(`SELECT item_id from ${TABLE_NAME_PROFILE} WHERE id in ( ${'\'' + itemsIds.join('\',\'') + '\''})`,
+        connection.query(`SELECT id from ${TABLE_NAME_PROFILE} WHERE id in ( ${'\'' + itemsIds.join('\',\'') + '\''})`,
             function (err, result) {
                 callback(err, result);
             });

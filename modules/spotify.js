@@ -4,9 +4,10 @@ const db = require("./database");
 const errors = require("./errors");
 const TABLE_NAME_PROFILE = config.get('spotify:table_name_profile');
 const TABLE_NAME_POST = config.get('spotify:table_name_post');
-const TABLE_NAME_SEARCH = config.get('spotify:table_name_search');
 const POSTS_LIMIT = 50;
-
+const ALBUM = 'album';
+const PLAYLIST = 'playlist';
+const TRACK = 'track';
 //search
 const MAX_SEARCH_LIMIT = 50;
 const FILTER_ARTIST = 'artist';
@@ -190,7 +191,7 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
         if(existingPostIds.indexOf(posts[i].id) !== -1){
             updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent}, user_id = '${user_id}' where id = '${id}';`;
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id ) VALUES ('${id}', ${details}, ${textcontent}, '${user_id}');`;
+            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id, type ) VALUES ('${id}', ${details}, ${textcontent}, '${user_id}', ${ALBUM});`;
         }
     }
     connection.query(updateQuery+insertQuery, callback);
@@ -212,11 +213,12 @@ function search (q, filter, page, itemsPerPage, token, next) {
     if(filter !== FILTER_TRACK && filter !== FILTER_PLAYLIST && filter !== FILTER_ARTIST){
         return next(errors.invalidSearchFilter);
     }
+    let searchResults = [];
     let existingItemsIds = [];
     let offset = page*itemsPerPage;
-    request(`${config.get('spotify:api_url')}search?q=${q}&access_token=${token}&limit=${itemsPerPage}&offset=${offset}&type=${filter}` , function(err, result){
+    request(`${config.get('spotify:api_url')}search?q=${q}&access_token=${token}&limit=${MAX_SEARCH_LIMIT}&offset=${offset}&type=${filter}` , function(err, result){
         let body = null;
-        if( result.body ){
+        if(result && result.body ){
             try{
                 body = JSON.parse(result.body);
                 err = body.error;
@@ -230,7 +232,6 @@ function search (q, filter, page, itemsPerPage, token, next) {
         if(!body){
             return next(errors.emptyResult);
         }
-        next(null, body);
         let itemsIds = [];
         let found;
         switch(filter){
@@ -244,6 +245,14 @@ function search (q, filter, page, itemsPerPage, token, next) {
                 found = body.tracks;
                 break;
         }
+        if(found && found.items) {
+            if (found.items.length > itemsPerPage) {
+                searchResults = found.items.slice(0, itemsPerPage);
+            } else {
+                searchResults = found.items.slice(0, body.length);
+            }
+        }
+        next(null, searchResults);
         if(found && found.items && found.items.length>0) {
             for (let i = found.items.length - 1; i >= 0; i--) {
                 if (itemsIds.indexOf(found.items[i].id) !== -1) {
@@ -254,17 +263,16 @@ function search (q, filter, page, itemsPerPage, token, next) {
             }
         }
         if(itemsIds.length>0){
-            checkExistingItems(q, filter, itemsIds, function(err, results){
+            checkExistingItems(filter, itemsIds, function(err, results){
                 if(err){
                     return console.error(err);
                 }
                 if(results && results.length>0) {
                     for (let i = 0; i < results.length; i++) {
-                        existingItemsIds.push(results[i].item_id);
+                        existingItemsIds.push(results[i].id);
                     }
                 }
-                let items = [];
-                addSearchItems(q, filter, found.items, existingItemsIds, function(err){
+                addSearchItems(filter, found.items, existingItemsIds, function(err){
                     if(err){
                         console.error(err);
                     }
@@ -274,30 +282,54 @@ function search (q, filter, page, itemsPerPage, token, next) {
     });
 }
 
-function checkExistingItems(q, filter, itemsIds, callback){
+function checkExistingItems(filter, itemsIds, callback){
     const connection = db.getConnection();
-    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = ? and filter = ?;`, [q, filter],
-        function(err, result){
-            callback(err, result);
-        });
+    if(filter === FILTER_ARTIST) {
+        connection.query(`SELECT item_id from ${TABLE_NAME_PROFILE} WHERE id in ( ${'\'' + itemsIds.join('\',\'') + '\''});`,
+            function (err, result) {
+                callback(err, result);
+            });
+    } else {
+        checkExistingPosts(itemsIds, callback);
+    }
 }
 
 //add search items
-function addSearchItems (q, filter, items, existingStatusIds, callback) {
+function addSearchItems (filter, items, existingItemsIds, callback) {
     const connection = db.getConnection();
     let updateQuery = '';
     let insertQuery = '';
     let details;
-    let id;
-    q = connection.escape(q);
-    filter = connection.escape(filter);
+    let id, type, name;
+    let textcontent;
+    let user_id = 0;
     for(let i = 0; i < items.length; i++){
+        switch(filter){
+            case FILTER_PLAYLIST:
+                type = PLAYLIST;
+                break;
+            case FILTER_TRACK:
+                type = TRACK;
+                break;
+        }
         id = items[i].id;
+        name = connection.escape(items[i].name);
         details = connection.escape(JSON.stringify(items[i]));
-        if(existingStatusIds.indexOf(id) !== -1){
-            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q} and filter = ${filter};`;
+        textcontent = (items[i].name) ? connection.escape(items[i].name) : null;
+        if(existingItemsIds.indexOf(id) !== -1){
+            if(filter === FILTER_ARTIST){
+                updateQuery += `UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ${details} where id = '${id}';`;
+            } else {
+                updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent} where id = '${id}';`;
+            }
+
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query, filter ) VALUES ('${id}', ${details}, ${q}, ${filter});`;
+            if(filter === FILTER_ARTIST){
+                insertQuery += `INSERT INTO ${TABLE_NAME_PROFILE} (id, name, detail_json) VALUES ('${id}', ${name}, ${details});`;
+            } else {
+                user_id = (items[i].owner) ? connection.escape(items[i].owner.id) : 0;
+                insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id, type ) VALUES ('${id}', ${details}, ${textcontent}, ${user_id}, '${type}');`;
+            }
         }
     }
     connection.query(updateQuery+insertQuery, callback);

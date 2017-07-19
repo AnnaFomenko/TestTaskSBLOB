@@ -5,8 +5,9 @@ const errors = require("./errors");
 const async = require("async");
 const TABLE_NAME_PROFILE = config.get('youtube:table_name_profile');
 const TABLE_NAME_POST = config.get('youtube:table_name_post');
-const TABLE_NAME_SEARCH = config.get('youtube:table_name_search');
 const POSTS_LIMIT = 50;
+const VIDEO = 'video';
+const PLAYLIST = 'playlist';
 
 //search
 const MAX_SEARCH_LIMIT = 50;
@@ -118,7 +119,7 @@ function addOrUpdateData ( id, details, next) {
         }
         details = JSON.stringify(details);
         if(result && result.length > 0){
-            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ?, updated = NOW() where id = ?;`,[details, id], function(err){
+            connection.query(`UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ? where id = ?;`,[details, id], function(err){
                 if(err){
                     return next(err);
                 }
@@ -364,16 +365,16 @@ function getOnePage (q, nextResult, filter, token, callback) {
         nextResult = body.nextPageToken;
         callback(null, body, nextResult);
         if(itemsIds.length>0){
-            checkExistingItems(q, filter, itemsIds, function(err, results){
+            checkExistingItems(filter, itemsIds, function(err, results){
                 if(err){
                     return console.error(err);
                 }
                 if(results && results.length>0) {
                     for (let i = 0; i < results.length; i++) {
-                        existingItemsIds.push(results[i].item_id);
+                        existingItemsIds.push(results[i].id);
                     }
                 }
-                addSearchItems (q, filter, body.items, existingItemsIds, function(err){
+                addSearchItems (filter, body.items, existingItemsIds, function(err){
                     if(err){
                         console.error(err);
                     }
@@ -384,40 +385,54 @@ function getOnePage (q, nextResult, filter, token, callback) {
 }
 
 //
-function checkExistingItems(q, filter, itemsIds, callback){
+function checkExistingItems( filter, itemsIds, callback){
     const connection = db.getConnection();
-    connection.query(`SELECT item_id from ${TABLE_NAME_SEARCH} WHERE item_id in ( ${'\''+ itemsIds.join('\',\'')+'\''}) and query = ? and filter = ?;`, [q, filter],
-        function(err, result){
-            callback(err, result);
-        });
+    if(filter !== FILTER_CHANNEL){
+        checkExistingPosts(itemsIds, callback);
+    } else {
+        connection.query(`SELECT item_id from ${TABLE_NAME_PROFILE} WHERE id in ( ${'\'' + itemsIds.join('\',\'') + '\''})`,
+            function (err, result) {
+                callback(err, result);
+            });
+    }
 }
 
 //add search items
-function addSearchItems (q, filter, items, existingStatusIds, callback) {
+function addSearchItems (filter, items, existingStatusIds, callback) {
     const connection = db.getConnection();
     let updateQuery = '';
     let insertQuery = '';
-    let details;
-    let id;
-    q = connection.escape(q);
-    let filterEscaped = connection.escape(filter);
+    let details, textcontent, type;
+    let id, user_id;
     for(let i = 0; i < items.length; i++){
         switch(filter) {
             case FILTER_PLAYLIST:
+                type = PLAYLIST;
                 id = items[i].id.playlistId;
                 break;
             case FILTER_VIDEO:
+                type = VIDEO;
                 id = items[i].id.videoId;
                 break;
             case FILTER_CHANNEL:
                 id = items[i].id.channelId;
                 break;
         }
+        textcontent = connection.escape(items[i].title);
         details = connection.escape(JSON.stringify(items[i]));
         if(existingStatusIds.indexOf(id) !== -1){
-            updateQuery += `UPDATE ${TABLE_NAME_SEARCH} SET search_result = ${details} where item_id = '${id}' and query = ${q} and filter = ${filterEscaped};`;
+            if(filter === FILTER_CHANNEL) {
+                updateQuery += `UPDATE ${TABLE_NAME_PROFILE} SET detail_json = ${details} where id = '${id}';`;
+            } else {
+                updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent} where id = '${id}';`;
+            }
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_SEARCH} ( item_id, search_result, query, filter ) VALUES ('${id}', ${details}, ${q}, ${filterEscaped});`;
+            if(filter === FILTER_CHANNEL) {
+                insertQuery += `INSERT INTO ${TABLE_NAME_PROFILE} ( id, detail_json ) VALUES ('${id}', ${details});`;
+            } else {
+                user_id = (items[i].snippet) ? items[i].snippet.channelId : 0;
+                insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id, type ) VALUES ('${id}', ${details}, ${textcontent}, '${user_id}', '${type}');`;
+            }
         }
     }
     connection.query(updateQuery+insertQuery, callback);

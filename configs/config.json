@@ -10,7 +10,6 @@
   "facebook": {
     "table_name_profile": "fbusers",
     "table_name_post": "fbpost",
-    "table_name_search": "fbsearch",
     "client_id": "1963346297236330",
     "client_secret": "dcd4d65b7beaa4989ac96d887f105a5a",
     "api_url": "https://graph.facebook.com/v2.9"
@@ -18,7 +17,6 @@
   "twitter": {
     "table_name_profile": "twitterusers",
     "table_name_post": "twitterpost",
-    "table_name_search": "twittersearch",
     "consumer_key": "iuk02N5utJ4WS11oO30BrZOOl",
     "consumer_secret":"NlacuvI2HQ5j8YOkTDPME0lHveU8AjFxQOX5B5TjWhqemMbObW",
     "api_url":"https://api.twitter.com/1.1/"
@@ -26,13 +24,11 @@
   "spotify": {
     "table_name_profile": "spotifyusers",
     "table_name_post": "spotifypost",
-    "table_name_search": "spotifysearch",
     "api_url":"https://api.spotify.com/v1/"
   },
   "youtube": {
     "table_name_profile": "youtubeusers",
     "table_name_post": "youtubepost",
-    "table_name_search": "youtubesearch",
     "api_url":"https://www.googleapis.com/youtube/v3/"
   }
 

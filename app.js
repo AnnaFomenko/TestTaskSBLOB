@@ -55,14 +55,14 @@ db.init(function(err, connection){
     } else {
         //test
 
-        facebook.updateProfile('berniesanders','EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD',  function(err, id){
+       facebook.updateProfile('berniesanders','EAACEdEose0cBAD6Gwi5X56g0KTos3ZATcsRZCHYH8vHZAu8I8AeIUYJ9j6jVzpyKAkJYogSfR9Pm4zZBoopsYzreZAbmIbC4ZAMSeBzrXn6l2Fbni9F1KlPh2KTSMsGTWpo2PZBV6m4a6RvNeMuxRf2ZAD2aC2BVzLZByAEoZCYP8ssBMjwHAu8zhQ0RcNbSyFrbcZD',  function(err, id){
             if(err){
                console.log('facebook updateProfile err = '+err.message);
             } else {
                 console.log('facebook updateProfile userId = '+id);
             }
         });
-        facebook.updatePosts('901526266540071', 'EAACEdEose0cBAKGB7JhJJoOIB5CASDpQ12JL4CAsqw9MkyTZBfnCLB2RiWEN0aTPqZCbnbgykStm796maeIVtpUD0buo4Y5eWnydCjqZB3jyRdFZCIM9F7Vk7fshdwjrkffzPihtfmRJhevbSDZAmCTclkvTHPditubLanvSOcAHF08zsHM1FSOedAWfaER0ZD', false, function(err, id){
+        facebook.updatePosts('901526266540071', 'EAACEdEose0cBAD6Gwi5X56g0KTos3ZATcsRZCHYH8vHZAu8I8AeIUYJ9j6jVzpyKAkJYogSfR9Pm4zZBoopsYzreZAbmIbC4ZAMSeBzrXn6l2Fbni9F1KlPh2KTSMsGTWpo2PZBV6m4a6RvNeMuxRf2ZAD2aC2BVzLZByAEoZCYP8ssBMjwHAu8zhQ0RcNbSyFrbcZD', false, function(err, id){
             if(err){
                console.log('facebook updatePosts err = '+err.message);
             } else {
@@ -70,7 +70,7 @@ db.init(function(err, connection){
             }
         });
 
-        facebook.search('hot summer', facebook.searchFilter.USER , 3,  10, 'EAACEdEose0cBAGWGJ3rH5QydZAI4weCHAJxTNkWYvZBx0MVoK9BZBZBhe23gF600hSQl5KDTfskBb23IOkTuqQJokHjM3HUUw7RUd7YNXP5XzcZB1sdGm3jCE6pIurRcRCi4aZAi02MZBjkbWFu0Wrb6ghR1b6e0L28cxKJ8KFdZAbwgLAkz2i2FSJl6oYDCE94ZD', function(err, result){
+        facebook.search('hot summer', facebook.searchFilter.USER , 3,  10, 'EAACEdEose0cBAD6Gwi5X56g0KTos3ZATcsRZCHYH8vHZAu8I8AeIUYJ9j6jVzpyKAkJYogSfR9Pm4zZBoopsYzreZAbmIbC4ZAMSeBzrXn6l2Fbni9F1KlPh2KTSMsGTWpo2PZBV6m4a6RvNeMuxRf2ZAD2aC2BVzLZByAEoZCYP8ssBMjwHAu8zhQ0RcNbSyFrbcZD', function(err, result){
             if(err){
                 console.log('facebook search err = '+err.message);
             } else {
@@ -78,21 +78,21 @@ db.init(function(err, connection){
             }
         });
 
-        twitter.updateProfile({screen_name:'AnnaFomenko4'}, null, function(err, options){
+        twitter.updateProfile({user_id:'3399477436'}, null, function(err, options){
             if(err){
                 console.log('twitter updateProfile err = '+err.message);
             } else {
                 console.log('twitter updateProfile user = '+JSON.stringify(options));
             }
         });
-        twitter.updatePosts('884356029798023173', null, true, function(err, id){
+       twitter.updatePosts('884356029798023173', null, true, function(err, id){
             if(err){
                 console.log('twitter updatePosts err = '+err.message);
             } else {
                 console.log('twitter updatePosts user = '+id);
             }
         });
-        twitter.search('twitter', twitter.searchFilter.USER , 3,  10, {token:'884356029798023173-VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', token_secret:'XdeSQgs1UwBjy2bGgUftR4xBewhqnhfUOKD31lJA1ePci'}, function(err, result){
+        twitter.search('summer', twitter.searchFilter.TWEET , 3,  5, {token:'884356029798023173-VxfmLdJvZaUpOie5O9ju8sdrn6pVuUf', token_secret:'XdeSQgs1UwBjy2bGgUftR4xBewhqnhfUOKD31lJA1ePci'}, function(err, result){
              if(err){
                 console.log('twitter search err = '+err);
              } else {
@@ -113,14 +113,13 @@ db.init(function(err, connection){
                 console.log('youtube updatePosts userId = '+id);
             }
         });
-        youtube.search('winter', youtube.searchFilter.VIDEO, 3, 10, 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, result){
+        youtube.search('winter', youtube.searchFilter.PLAYLIST, 3, 10, 'AIzaSyC-naga23QqSpzBCdPpx792q4l4Pk5_9Wg', function(err, result){
             if(err){
                 console.log('youtube search err = '+err.message);
             } else {
                 console.log('youtube search result = '+JSON.stringify(result));
             }
         });
-
         spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBbLsvfwpL65vtxdWKLFQ4QHJi-mVXc_Vwra8WjHupQiaSIpkFdw0Ckrsv1t6V56g0kernRZKuEwy89KyF5_Ds6wch1LQHwBR3C4IwDvDJD2WqMlKZFrXPiTT06wpujxJBguJ14xX6SKQKAH0Ye7lM1P9hvoKVqOnzZWZgy6hzPU8X6q1Xy3p37B-XUoaC9LATon39N2meoAdgPoZCrI4erPBpHqDJRtwwIzepMrKkXxcjWvEU2-p45tL1DEoTx030C5NNHKZnMq5T0iUBDEDQBBrpyyVIq9GkusknjXrV52WF-agt0D8XCB1HicdF668x1qZ3R_tVRRZKMY6MREQ', function(err, id){
             if(err){
                 console.log('spotify updateProfile err = '+err.message);
@@ -135,7 +134,7 @@ db.init(function(err, connection){
                 console.log('spotify updatePosts userId = '+id);
             }
         });
-        spotify.search('lalalala', spotify.searchFilter.PLAYLIST, 1, 10, 'BQB5H-WqhJT345TrIlbEeeSpQ3IGRTZ56SC3trIETTgp5QinlQTkht6uXXY70jpO2Yly0R9br-rmYKwWuh54RqEKlXI4kJ6K3qyksLEJf8byLRL1TkONkgo2M5Ehxt88MJd0Wi0b1r5s0OFjBQwwxNY-O0XBh5xC_73OBIwG2xWFkTLnB8AjyX5Csf5Sk2aKhUZGYDocZvuq4otRUN9lrGJ0Gy67lBj7wl6Fx-484BT0Zr7UJGWjmy_Ca1a5s-Ffk43b1IcZJ4CSitn3bTi911p72_x_t-0l8FtKlQ4yNd3989iLA0rmVp91g_tsPPKbYjAPHmjVGk4PeoCNLozLEA', function(err, result){
+        spotify.search('lalalala', spotify.searchFilter.PLAYLIST, 1, 10, 'BQB685pRKgfszf3S2Qwn2N8IsvEQRo1jdd7Imrkvs8ybjlCknybOFatZ9x4-KwykTjkPpmA2u7ZZxt4qW41GosnUjdAobkHko5D1FW0P2VcbpGIseD7oBwMNeSNTPmIE__2OgW3jD6r8rtXEvLms_umNOAE1CNx_4RjkwcZ8neJJAymQxNqc0nKh2jlHoj2p6mOYRpdp6B2CowyQI-ExLXqadgF7BX8yooMlj7dMgPIw-aiscHdwSYuTzmoHK8pfuvvoZ5Lggc9h4YEDDFIQjELLqI3ltaUBUizWAu0phxCQdi0C6zIhD8G2oa6jKmbvG9khz-TenhQKrw0Wva2AcQ', function(err, result){
             if(err){
                 console.log('spotify search err = '+err.message);
             } else {

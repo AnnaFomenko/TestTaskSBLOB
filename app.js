@@ -120,21 +120,21 @@ db.init(function(err, connection){
                 console.log('youtube search result = '+JSON.stringify(result));
             }
         });
-        spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQBbLsvfwpL65vtxdWKLFQ4QHJi-mVXc_Vwra8WjHupQiaSIpkFdw0Ckrsv1t6V56g0kernRZKuEwy89KyF5_Ds6wch1LQHwBR3C4IwDvDJD2WqMlKZFrXPiTT06wpujxJBguJ14xX6SKQKAH0Ye7lM1P9hvoKVqOnzZWZgy6hzPU8X6q1Xy3p37B-XUoaC9LATon39N2meoAdgPoZCrI4erPBpHqDJRtwwIzepMrKkXxcjWvEU2-p45tL1DEoTx030C5NNHKZnMq5T0iUBDEDQBBrpyyVIq9GkusknjXrV52WF-agt0D8XCB1HicdF668x1qZ3R_tVRRZKMY6MREQ', function(err, id){
+        spotify.updateProfile('0TnOYISbd1XYRBk9myaseg','BQAxFfQCZAPJMLkoZyTnv_VM6deiCzasrpRFMfhexwBA7PeE7oDEKjFh0O3EkijxgWMvXl8OqvNsko9FA9fxD9cTYKkv3VvLRfHd_FGFggOVnilecc9PT5je8_XybMVV9BCRazPeKLQsrG5u6fzxQjnGsb3K3W7v5d28eQQi7p1PYqwUFMbnp4FBPBnmK2A84oCwsqHwL0r4_jZOsq3TqNrS9vTTJidCg1FBZ0I2TdpoEVrKcWqNuZmgbMW-AKm-wR55KzbhkvI0fi5NNIjuUpa1fT74-sAdeKTZ22H3GN-Byq-NbCusy0nvSD-A3ntTOwvPSG_86AybTIQHTBm0mw', function(err, id){
             if(err){
                 console.log('spotify updateProfile err = '+err.message);
             } else {
                 console.log('spotify updateProfile userId='+id);
             }
         });
-        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQB5H-WqhJT345TrIlbEeeSpQ3IGRTZ56SC3trIETTgp5QinlQTkht6uXXY70jpO2Yly0R9br-rmYKwWuh54RqEKlXI4kJ6K3qyksLEJf8byLRL1TkONkgo2M5Ehxt88MJd0Wi0b1r5s0OFjBQwwxNY-O0XBh5xC_73OBIwG2xWFkTLnB8AjyX5Csf5Sk2aKhUZGYDocZvuq4otRUN9lrGJ0Gy67lBj7wl6Fx-484BT0Zr7UJGWjmy_Ca1a5s-Ffk43b1IcZJ4CSitn3bTi911p72_x_t-0l8FtKlQ4yNd3989iLA0rmVp91g_tsPPKbYjAPHmjVGk4PeoCNLozLEA', false, function(err, id){
+        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQAxFfQCZAPJMLkoZyTnv_VM6deiCzasrpRFMfhexwBA7PeE7oDEKjFh0O3EkijxgWMvXl8OqvNsko9FA9fxD9cTYKkv3VvLRfHd_FGFggOVnilecc9PT5je8_XybMVV9BCRazPeKLQsrG5u6fzxQjnGsb3K3W7v5d28eQQi7p1PYqwUFMbnp4FBPBnmK2A84oCwsqHwL0r4_jZOsq3TqNrS9vTTJidCg1FBZ0I2TdpoEVrKcWqNuZmgbMW-AKm-wR55KzbhkvI0fi5NNIjuUpa1fT74-sAdeKTZ22H3GN-Byq-NbCusy0nvSD-A3ntTOwvPSG_86AybTIQHTBm0mw', false, function(err, id){
             if(err){
                 console.log('spotify updatePosts err = '+err.message);
             } else {
                 console.log('spotify updatePosts userId = '+id);
             }
         });
-        spotify.search('lalalala', spotify.searchFilter.PLAYLIST, 1, 10, 'BQB685pRKgfszf3S2Qwn2N8IsvEQRo1jdd7Imrkvs8ybjlCknybOFatZ9x4-KwykTjkPpmA2u7ZZxt4qW41GosnUjdAobkHko5D1FW0P2VcbpGIseD7oBwMNeSNTPmIE__2OgW3jD6r8rtXEvLms_umNOAE1CNx_4RjkwcZ8neJJAymQxNqc0nKh2jlHoj2p6mOYRpdp6B2CowyQI-ExLXqadgF7BX8yooMlj7dMgPIw-aiscHdwSYuTzmoHK8pfuvvoZ5Lggc9h4YEDDFIQjELLqI3ltaUBUizWAu0phxCQdi0C6zIhD8G2oa6jKmbvG9khz-TenhQKrw0Wva2AcQ', function(err, result){
+        spotify.search('lalalala', spotify.searchFilter.PLAYLIST, 1, 10, 'BQAxFfQCZAPJMLkoZyTnv_VM6deiCzasrpRFMfhexwBA7PeE7oDEKjFh0O3EkijxgWMvXl8OqvNsko9FA9fxD9cTYKkv3VvLRfHd_FGFggOVnilecc9PT5je8_XybMVV9BCRazPeKLQsrG5u6fzxQjnGsb3K3W7v5d28eQQi7p1PYqwUFMbnp4FBPBnmK2A84oCwsqHwL0r4_jZOsq3TqNrS9vTTJidCg1FBZ0I2TdpoEVrKcWqNuZmgbMW-AKm-wR55KzbhkvI0fi5NNIjuUpa1fT74-sAdeKTZ22H3GN-Byq-NbCusy0nvSD-A3ntTOwvPSG_86AybTIQHTBm0mw', function(err, result){
             if(err){
                 console.log('spotify search err = '+err.message);
             } else {

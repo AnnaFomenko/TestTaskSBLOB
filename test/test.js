@@ -239,7 +239,7 @@ describe('Twitter Module', function() {
     });
     describe('updatePosts', function() {
         it("all is true", function(done) {
-            this.timeout(15000);
+            this.timeout(25000);
             twitter.updatePosts(data.twitter.user_id, data.twitter.token, true,  function(err, id){
                 if(err){
                     chai.expect(err).to.have.property('message');
@@ -400,8 +400,8 @@ describe('Youtube Module', function() {
         });
         it("test invalid access_token", function(done) {
             youtube.search('hot summer', youtube.searchFilter.VIDEO, 10,  10,  'mock token',  function(err, result){
-                chai.expect(err).to.have.property('message');
-                chai.expect(err.message).to.equal('Invalid token');
+                chai.expect(err).to.have.property('code');
+                chai.expect(err.code).to.equal(400);
                 done();
             });
         });

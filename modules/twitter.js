@@ -10,7 +10,7 @@ const TABLE_NAME_POST = config.get('twitter:table_name_post');
 const twitter  = new twit({ consumer_key: config.get('twitter:consumer_key')
                           , consumer_secret: config.get('twitter:consumer_secret')
                           , app_only_auth: true});
-const POSTS_LIMIT = 50;
+const POSTS_LIMIT = 200;
 //search
 const MAX_SEARCH_TWEET_LIMIT = 50;
 const MAX_SEARCH_USER_LIMIT = 20;

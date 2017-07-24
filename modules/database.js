@@ -13,7 +13,8 @@ exports.init = function (callback) {
     const createFBPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('facebook:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id VARCHAR(155),  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
     const createTwitPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('twitter:table_name_post')} (id_str VARCHAR(155), PRIMARY KEY(id_str), id BIGINT UNSIGNED, user_id VARCHAR(155), textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);`;
     const createYoutubePostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('youtube:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id VARCHAR(155),  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, type VARCHAR(16));`;
-    const createSpotifyPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), user_id VARCHAR(155),  textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, type VARCHAR(16));`;
+    const createSpotifyPostsTableQuery = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_post')} (id VARCHAR(155), PRIMARY KEY(id), textcontent TEXT, detail_json LONGBLOB, updated TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, type VARCHAR(16));`;
+    const createSpotifyAlbumsArtists = `CREATE TABLE IF NOT EXISTS ${config.get('spotify:table_name_link')}  (user_id VARCHAR(155) NOT NULL, album_id VARCHAR(155) NOT NULL, PRIMARY KEY(user_id, album_id));`;
     const tables = [
         createFBUsersTableQuery,
         createTwitUsersTableQuery,
@@ -22,7 +23,8 @@ exports.init = function (callback) {
         createFBPostsTableQuery,
         createTwitPostsTableQuery,
         createYoutubePostsTableQuery,
-        createSpotifyPostsTableQuery
+        createSpotifyPostsTableQuery,
+        createSpotifyAlbumsArtists
     ];
     const migrations = [`ALTER TABLE ${config.get('facebook:table_name_profile')} MODIFY id BIGINT UNSIGNED;`, `ALTER TABLE ${config.get('youtube:table_name_profile')} MODIFY id VARCHAR(155);`, `ALTER TABLE ${config.get('youtube:table_name_post')} MODIFY id VARCHAR(155);`, `ALTER TABLE ${config.get('youtube:table_name_post')} MODIFY user_id VARCHAR(155);`];
     migrations.push(`ALTER TABLE ${config.get('spotify:table_name_post')} MODIFY user_id VARCHAR(155);`);
@@ -53,7 +55,7 @@ exports.init = function (callback) {
                     }
                     connection.query(tables.join(""), function (err) {
                         if (err) {
-                            console.error(err.message)
+                            console.error(err)
                         } else {
                             connection.query(migrations.join(""), function (err) {
                                 if(err) {

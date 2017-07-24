@@ -4,6 +4,7 @@ const db = require("./database");
 const errors = require("./errors");
 const TABLE_NAME_PROFILE = config.get('spotify:table_name_profile');
 const TABLE_NAME_POST = config.get('spotify:table_name_post');
+const TABLE_NAME_LINK = config.get('spotify:table_name_link');
 const POSTS_LIMIT = 50;
 const ALBUM = 'album';
 const PLAYLIST = 'playlist';
@@ -184,17 +185,42 @@ function addOrUpdatePosts (user_id, posts, existingPostIds, callback) {
     let details;
     let textcontent='';
     let id;
+    let postIds = [];
+    let insertValues = [];
     for(let i = 0; i < posts.length; i++){
         id = posts[i].id;
+        postIds.push(id);
         details = connection.escape(JSON.stringify(posts[i]));
         textcontent = connection.escape(posts[i].name);
         if(existingPostIds.indexOf(posts[i].id) !== -1){
-            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent}, user_id = '${user_id}' where id = '${id}';`;
+            updateQuery += `UPDATE ${TABLE_NAME_POST} SET detail_json = ${details}, textcontent = ${textcontent} where id = '${id}';`;
         } else {
-            insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id, type ) VALUES ('${id}', ${details}, ${textcontent}, '${user_id}', ${ALBUM});`;
+            insertValues.push(`('${id}', ${details}, ${textcontent}, '${ALBUM}')`);
+        }
+        if(insertValues.length > 0){
+            insertQuery = `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, type ) VALUES ${[insertValues]};`;
         }
     }
-    connection.query(updateQuery+insertQuery, callback);
+    connection.query(updateQuery+insertQuery, function(err){
+        if(err){
+            return callback(err);
+        }
+        addLinkByUser(user_id, postIds, callback);
+    });
+}
+
+function addLinkByUser(userId, postIds, callback){
+    const connection = db.getConnection();
+    let insertValues = [];
+    for(let i = 0; i < postIds.length; i++){
+        insertValues.push(`('${userId}', '${postIds[i]}')`);
+    }
+    connection.query(`INSERT IGNORE INTO ${TABLE_NAME_LINK} ( user_id, album_id ) VALUES ${[insertValues]};`, callback);
+}
+
+function addLinks(insertValues, callback){
+    const connection = db.getConnection();
+    connection.query(`INSERT IGNORE INTO ${TABLE_NAME_LINK} ( user_id, album_id ) VALUES ${[insertValues]};`, callback);
 }
 
 function checkExistingPosts(postIds, callback){
@@ -303,15 +329,16 @@ function addSearchItems (filter, items, existingItemsIds, callback) {
     let id, type, name;
     let textcontent;
     let user_id = 0;
+    let insertLinkValues = [];
+    switch(filter){
+        case FILTER_PLAYLIST:
+            type = PLAYLIST;
+            break;
+        case FILTER_TRACK:
+            type = TRACK;
+            break;
+    }
     for(let i = 0; i < items.length; i++){
-        switch(filter){
-            case FILTER_PLAYLIST:
-                type = PLAYLIST;
-                break;
-            case FILTER_TRACK:
-                type = TRACK;
-                break;
-        }
         id = items[i].id;
         name = connection.escape(items[i].name);
         details = connection.escape(JSON.stringify(items[i]));
@@ -327,10 +354,26 @@ function addSearchItems (filter, items, existingItemsIds, callback) {
             if(filter === FILTER_ARTIST){
                 insertQuery += `INSERT INTO ${TABLE_NAME_PROFILE} (id, name, detail_json) VALUES ('${id}', ${name}, ${details});`;
             } else {
-                user_id = (items[i].owner) ? connection.escape(items[i].owner.id) : 0;
-                insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, user_id, type ) VALUES ('${id}', ${details}, ${textcontent}, ${user_id}, '${type}');`;
+                insertQuery += `INSERT INTO ${TABLE_NAME_POST} ( id, detail_json, textcontent, type ) VALUES ('${id}', ${details}, ${textcontent}, '${type}');`;
+                if(items[i].artists){
+                    for(let i = 0; i < items[i].artists.length; i++){
+                        insertLinkValues.push(`('${items[i].artists[i].id}', '${id}')`);
+                    }
+                }
+                if(items[i].owner){
+                    insertLinkValues.push(`('${items[i].owner.id}', '${id}')`);
+                }
+
             }
         }
     }
-    connection.query(updateQuery+insertQuery, callback);
+   connection.query(updateQuery+insertQuery, function(err, result){
+        if(err){
+            return callback(err);
+        }
+        if(filter === FILTER_ARTIST || insertLinkValues.length == 0){
+            return callback(null, result);
+        }
+        addLinks(insertLinkValues, callback);
+   });
 }

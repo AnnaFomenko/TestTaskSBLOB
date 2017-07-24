@@ -127,14 +127,14 @@ db.init(function(err, connection){
                 console.log('spotify updateProfile userId='+id);
             }
         });
-        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQAxFfQCZAPJMLkoZyTnv_VM6deiCzasrpRFMfhexwBA7PeE7oDEKjFh0O3EkijxgWMvXl8OqvNsko9FA9fxD9cTYKkv3VvLRfHd_FGFggOVnilecc9PT5je8_XybMVV9BCRazPeKLQsrG5u6fzxQjnGsb3K3W7v5d28eQQi7p1PYqwUFMbnp4FBPBnmK2A84oCwsqHwL0r4_jZOsq3TqNrS9vTTJidCg1FBZ0I2TdpoEVrKcWqNuZmgbMW-AKm-wR55KzbhkvI0fi5NNIjuUpa1fT74-sAdeKTZ22H3GN-Byq-NbCusy0nvSD-A3ntTOwvPSG_86AybTIQHTBm0mw', false, function(err, id){
+        spotify.updatePosts('0TnOYISbd1XYRBk9myaseg','BQAwBB-0amFSGxOvV_El97NQnUzYNlSVhTjOBaDIOHD8bBtDUIGS8GZHftxp6RL8NktDqgw2hkHO2umxxjL4sIw1A8dHWx1137iaKDlp9OQ6FWPa3REfYZCADxnzfd8zmklUyeR-JLz26RVup_6zkvDVn4nSkxk4ghbr4ulBMyhnwiYed7yaLzgVFeI43rJMTlgY1wrBKniHZm8mJjyrEiHiEXGLKm4po2bWaR9QIltpqgUtjS-0-wLB2amAQFfXsrm5Mp84CKym_rKdbQR8asIg8iUAOyTOEdxH1AQCxNJqNu8PgJRyaIHiKN57RR9mfcH9VUNftFGBIpMF9V38xA', false, function(err, id){
             if(err){
                 console.log('spotify updatePosts err = '+err.message);
             } else {
                 console.log('spotify updatePosts userId = '+id);
             }
         });
-        spotify.search('lalalala', spotify.searchFilter.PLAYLIST, 1, 10, 'BQAxFfQCZAPJMLkoZyTnv_VM6deiCzasrpRFMfhexwBA7PeE7oDEKjFh0O3EkijxgWMvXl8OqvNsko9FA9fxD9cTYKkv3VvLRfHd_FGFggOVnilecc9PT5je8_XybMVV9BCRazPeKLQsrG5u6fzxQjnGsb3K3W7v5d28eQQi7p1PYqwUFMbnp4FBPBnmK2A84oCwsqHwL0r4_jZOsq3TqNrS9vTTJidCg1FBZ0I2TdpoEVrKcWqNuZmgbMW-AKm-wR55KzbhkvI0fi5NNIjuUpa1fT74-sAdeKTZ22H3GN-Byq-NbCusy0nvSD-A3ntTOwvPSG_86AybTIQHTBm0mw', function(err, result){
+        spotify.search('lala', spotify.searchFilter.PLAYLIST, 1, 10, 'BQAwBB-0amFSGxOvV_El97NQnUzYNlSVhTjOBaDIOHD8bBtDUIGS8GZHftxp6RL8NktDqgw2hkHO2umxxjL4sIw1A8dHWx1137iaKDlp9OQ6FWPa3REfYZCADxnzfd8zmklUyeR-JLz26RVup_6zkvDVn4nSkxk4ghbr4ulBMyhnwiYed7yaLzgVFeI43rJMTlgY1wrBKniHZm8mJjyrEiHiEXGLKm4po2bWaR9QIltpqgUtjS-0-wLB2amAQFfXsrm5Mp84CKym_rKdbQR8asIg8iUAOyTOEdxH1AQCxNJqNu8PgJRyaIHiKN57RR9mfcH9VUNftFGBIpMF9V38xA', function(err, result){
             if(err){
                 console.log('spotify search err = '+err.message);
             } else {

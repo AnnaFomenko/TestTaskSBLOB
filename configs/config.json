@@ -24,6 +24,7 @@
   "spotify": {
     "table_name_profile": "spotifyusers",
     "table_name_post": "spotifypost",
+    "table_name_link": "albumsartists",
     "api_url":"https://api.spotify.com/v1/"
   },
   "youtube": {
